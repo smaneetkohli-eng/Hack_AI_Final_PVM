@@ -1,5 +1,5 @@
 import dagre from "dagre";
-import type { Node, Edge } from "reactflow";
+import { MarkerType, type Node, type Edge } from "reactflow";
 import type { DBNode } from "@/types";
 
 const NODE_WIDTH = 260;
@@ -9,6 +9,14 @@ export interface PillNodeData {
   label: string;
   status: DBNode["status"];
   nodeId: string;
+}
+
+export interface EdgeStyleResult {
+  stroke: string;
+  strokeWidth: number;
+  strokeDasharray: string;
+  opacity: number;
+  animated: boolean;
 }
 
 export function dbNodesToReactFlow(nodes: DBNode[]): {
@@ -47,7 +55,7 @@ export function dbNodesToReactFlow(nodes: DBNode[]): {
               id: `e-${sourceId}-${node.id}`,
               source: sourceId,
               target: node.id,
-              type: "smoothstep",
+              type: "statusEdge",
             });
           }
         }
@@ -59,7 +67,7 @@ export function dbNodesToReactFlow(nodes: DBNode[]): {
         id: `e-${sorted[i].id}-${sorted[i + 1].id}`,
         source: sorted[i].id,
         target: sorted[i + 1].id,
-        type: "smoothstep",
+        type: "statusEdge",
       });
     }
   }
@@ -70,14 +78,15 @@ export function dbNodesToReactFlow(nodes: DBNode[]): {
 export function getLayoutedElements(
   nodes: Node<PillNodeData>[],
   edges: Edge[],
-  direction: "TB" | "LR" = "TB"
+  direction: "TB" | "LR" = "LR",
+  savedPositions?: Record<string, { x: number; y: number }>
 ): { nodes: Node<PillNodeData>[]; edges: Edge[] } {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
   g.setGraph({
     rankdir: direction,
-    nodesep: 60,
-    ranksep: 80,
+    nodesep: 50,
+    ranksep: 100,
     marginx: 40,
     marginy: 40,
   });
@@ -93,6 +102,12 @@ export function getLayoutedElements(
   dagre.layout(g);
 
   const layoutedNodes = nodes.map((node) => {
+    if (savedPositions?.[node.id]) {
+      return {
+        ...node,
+        position: savedPositions[node.id],
+      };
+    }
     const pos = g.node(node.id);
     return {
       ...node,
@@ -109,12 +124,7 @@ export function getLayoutedElements(
 export function getEdgeStyle(
   sourceStatus: DBNode["status"],
   targetStatus: DBNode["status"]
-): {
-  stroke: string;
-  strokeWidth: number;
-  strokeDasharray: string;
-  opacity: number;
-} {
+): EdgeStyleResult {
   const sourceComplete =
     sourceStatus === "complete" || sourceStatus === "known";
   const targetComplete =
@@ -123,9 +133,10 @@ export function getEdgeStyle(
   if (sourceComplete && targetComplete) {
     return {
       stroke: "#10b981",
-      strokeWidth: 2,
-      strokeDasharray: "6 3",
+      strokeWidth: 2.5,
+      strokeDasharray: "0",
       opacity: 1,
+      animated: false,
     };
   }
 
@@ -133,8 +144,9 @@ export function getEdgeStyle(
     return {
       stroke: "#6366f1",
       strokeWidth: 2,
-      strokeDasharray: "6 3",
+      strokeDasharray: "6 4",
       opacity: 0.9,
+      animated: true,
     };
   }
 
@@ -143,5 +155,24 @@ export function getEdgeStyle(
     strokeWidth: 1.5,
     strokeDasharray: "4 4",
     opacity: 0.4,
+    animated: true,
   };
+}
+
+export function getEdgeMarker(
+  sourceStatus: DBNode["status"],
+  targetStatus: DBNode["status"]
+): Edge["markerEnd"] {
+  const sourceComplete =
+    sourceStatus === "complete" || sourceStatus === "known";
+  const targetComplete =
+    targetStatus === "complete" || targetStatus === "known";
+
+  if (sourceComplete && targetComplete) {
+    return { type: MarkerType.ArrowClosed, color: "#10b981", width: 18, height: 18 };
+  }
+  if (sourceComplete) {
+    return { type: MarkerType.ArrowClosed, color: "#6366f1", width: 18, height: 18 };
+  }
+  return { type: MarkerType.ArrowClosed, color: "#334155", width: 16, height: 16 };
 }

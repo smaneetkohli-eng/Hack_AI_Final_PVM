@@ -1,13 +1,15 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useRef, useState, useEffect } from "react";
 import ReactFlow, {
   Background,
   Controls,
+  applyNodeChanges,
   type NodeMouseHandler,
   type Node,
   type Edge,
   type EdgeProps,
+  type NodeChange,
   BaseEdge,
   getSmoothStepPath,
 } from "reactflow";
@@ -21,11 +23,22 @@ import {
   dbNodesToReactFlow,
   getLayoutedElements,
   getEdgeStyle,
+  getEdgeMarker,
   type PillNodeData,
 } from "@/lib/graphUtils";
 import { RoadmapPillNode } from "./RoadmapPillNode";
+import { createClient } from "@/lib/supabase";
 
 const nodeTypes = { pillNode: RoadmapPillNode };
+
+let dashCssInjected = false;
+function injectDashCSS() {
+  if (dashCssInjected || typeof document === "undefined") return;
+  const style = document.createElement("style");
+  style.textContent = `@keyframes dashFlow { to { stroke-dashoffset: -20; } }`;
+  document.head.appendChild(style);
+  dashCssInjected = true;
+}
 
 function StatusEdge({
   id,
@@ -36,6 +49,7 @@ function StatusEdge({
   sourcePosition,
   targetPosition,
   data,
+  markerEnd,
 }: EdgeProps & { data?: { sourceStatus: string; targetStatus: string } }) {
   const [edgePath] = getSmoothStepPath({
     sourceX,
@@ -56,11 +70,15 @@ function StatusEdge({
     <BaseEdge
       id={id}
       path={edgePath}
+      markerEnd={markerEnd}
       style={{
         stroke: style.stroke,
         strokeWidth: style.strokeWidth,
         strokeDasharray: style.strokeDasharray,
         opacity: style.opacity,
+        ...(style.animated
+          ? { animation: "dashFlow 0.6s linear infinite" }
+          : {}),
       }}
     />
   );
@@ -69,8 +87,15 @@ function StatusEdge({
 const edgeTypes = { statusEdge: StatusEdge };
 
 export function RoadmapGraph() {
-  const { nodes: dbNodes, activeSkillId, skills, setPeekPanelNodeId } =
-    useAppStore();
+  const {
+    nodes: dbNodes,
+    activeSkillId,
+    skills,
+    setPeekPanelNodeId,
+    updateNodePosition,
+  } = useAppStore();
+
+  useEffect(() => { injectDashCSS(); }, []);
 
   const activeSkill = skills.find((s) => s.id === activeSkillId);
   const skillModules = useMemo(
@@ -82,12 +107,19 @@ export function RoadmapGraph() {
   );
   const progress = getProgressPercent(skillModules);
 
-  // #region agent log
-  fetch('http://127.0.0.1:7255/ingest/b1da3392-fc1d-4bc2-b909-39ad910d2260',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a01fbe'},body:JSON.stringify({sessionId:'a01fbe',location:'RoadmapGraph.tsx:84',message:'skillModules count',data:{count:skillModules.length,activeSkillId,totalDbNodes:dbNodes.length},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
-  // #endregion
+  const savedPositions = useMemo(() => {
+    const positions: Record<string, { x: number; y: number }> = {};
+    for (const n of skillModules) {
+      if (n.position_x != null && n.position_y != null) {
+        positions[n.id] = { x: n.position_x, y: n.position_y };
+      }
+    }
+    return Object.keys(positions).length > 0 ? positions : undefined;
+  }, [skillModules]);
 
-  const { nodes, edges } = useMemo(() => {
-    if (skillModules.length === 0) return { nodes: [], edges: [] };
+  const { initialNodes, edges: layoutedEdges } = useMemo(() => {
+    if (skillModules.length === 0)
+      return { initialNodes: [] as Node<PillNodeData>[], edges: [] as Edge[] };
 
     const { nodes: rfNodes, edges: rfEdges } =
       dbNodesToReactFlow(skillModules);
@@ -96,21 +128,73 @@ export function RoadmapGraph() {
     for (const n of skillModules) {
       nodeStatusMap[n.id] = n.status;
     }
-    const styledEdges: Edge[] = rfEdges.map((e) => ({
-      ...e,
-      type: "statusEdge",
-      data: {
-        sourceStatus: nodeStatusMap[e.source] ?? "available",
-        targetStatus: nodeStatusMap[e.target] ?? "available",
-      },
-    }));
 
-    const result = getLayoutedElements(rfNodes, styledEdges, "TB");
-    // #region agent log
-    fetch('http://127.0.0.1:7255/ingest/b1da3392-fc1d-4bc2-b909-39ad910d2260',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a01fbe'},body:JSON.stringify({sessionId:'a01fbe',location:'RoadmapGraph.tsx:105',message:'layout result',data:{nodeCount:result.nodes.length,edgeCount:result.edges.length,firstNodePos:result.nodes[0]?.position,firstNodeType:result.nodes[0]?.type},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
-    // #endregion
-    return result;
-  }, [skillModules]);
+    const styledEdges: Edge[] = rfEdges.map((e) => {
+      const sourceStatus = (nodeStatusMap[e.source] ?? "available") as NodeStatus;
+      const targetStatus = (nodeStatusMap[e.target] ?? "available") as NodeStatus;
+      return {
+        ...e,
+        type: "statusEdge",
+        data: { sourceStatus, targetStatus },
+        markerEnd: getEdgeMarker(sourceStatus, targetStatus),
+      };
+    });
+
+    const result = getLayoutedElements(rfNodes, styledEdges, "LR", savedPositions);
+    return { initialNodes: result.nodes, edges: result.edges };
+  }, [skillModules, savedPositions]);
+
+  const [displayNodes, setDisplayNodes] = useState<Node<PillNodeData>[]>(initialNodes);
+
+  useEffect(() => {
+    setDisplayNodes(initialNodes);
+  }, [initialNodes]);
+
+  const dragTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      setDisplayNodes((prev) => applyNodeChanges(changes, prev) as Node<PillNodeData>[]);
+
+      const dragStops = changes.filter(
+        (c) => c.type === "position" && c.dragging === false && c.position
+      );
+
+      if (dragStops.length > 0) {
+        for (const change of dragStops) {
+          if (change.type === "position" && change.position) {
+            updateNodePosition(change.id, change.position.x, change.position.y);
+          }
+        }
+
+        if (dragTimeoutRef.current) clearTimeout(dragTimeoutRef.current);
+        dragTimeoutRef.current = setTimeout(async () => {
+          const supabase = createClient();
+          const currentDbNodes = useAppStore.getState().nodes;
+
+          for (const change of dragStops) {
+            if (change.type === "position" && change.position) {
+              const dbNode = currentDbNodes.find((d) => d.id === change.id);
+              if (
+                dbNode &&
+                (dbNode.position_x !== change.position.x ||
+                  dbNode.position_y !== change.position.y)
+              ) {
+                await supabase
+                  .from("nodes")
+                  .update({
+                    position_x: change.position.x,
+                    position_y: change.position.y,
+                  })
+                  .eq("id", change.id);
+              }
+            }
+          }
+        }, 500);
+      }
+    },
+    [updateNodePosition]
+  );
 
   const onNodeClick: NodeMouseHandler = useCallback(
     (_event: React.MouseEvent, node: Node<PillNodeData>) => {
@@ -148,10 +232,6 @@ export function RoadmapGraph() {
     );
   }
 
-  // #region agent log
-  fetch('http://127.0.0.1:7255/ingest/b1da3392-fc1d-4bc2-b909-39ad910d2260',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a01fbe'},body:JSON.stringify({sessionId:'a01fbe',location:'RoadmapGraph.tsx:render',message:'rendering ReactFlow',data:{nodesLen:nodes.length,edgesLen:edges.length,nodeIds:nodes.map((n: Node<PillNodeData>)=>n.id).slice(0,3),nodePositions:nodes.slice(0,2).map((n: Node<PillNodeData>)=>n.position)},timestamp:Date.now(),hypothesisId:'H3,H5'})}).catch(()=>{});
-  // #endregion
-
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {activeSkill && (
@@ -172,23 +252,20 @@ export function RoadmapGraph() {
         </div>
       )}
 
-      <div className="flex-1 relative" ref={(el) => {
-        // #region agent log
-        if (el) { fetch('http://127.0.0.1:7255/ingest/b1da3392-fc1d-4bc2-b909-39ad910d2260',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a01fbe'},body:JSON.stringify({sessionId:'a01fbe',location:'RoadmapGraph.tsx:container-ref',message:'container dimensions',data:{width:el.offsetWidth,height:el.offsetHeight,clientWidth:el.clientWidth,clientHeight:el.clientHeight},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{}); }
-        // #endregion
-      }}>
+      <div className="flex-1 relative">
         <ReactFlow
-          nodes={nodes}
-          edges={edges}
+          nodes={displayNodes}
+          edges={layoutedEdges}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
+          onNodesChange={onNodesChange}
           onNodeClick={onNodeClick}
           fitView
           fitViewOptions={{ padding: 0.3 }}
           proOptions={{ hideAttribution: true }}
-          nodesDraggable={false}
+          nodesDraggable
           nodesConnectable={false}
-          elementsSelectable={false}
+          elementsSelectable
           panOnScroll
           zoomOnScroll
           minZoom={0.3}

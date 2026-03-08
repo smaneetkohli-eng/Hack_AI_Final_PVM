@@ -50,7 +50,7 @@ const statusConfig: Record<
     bg: "bg-[#0a1a20]",
     labelBg: "bg-secondary/15",
     labelText: "text-secondary-light",
-    labelValue: "AVAILABLE",
+    labelValue: "IN PROGRESS",
     icon: <Sparkles className="w-3.5 h-3.5 text-secondary-light" />,
     glow: "shadow-[0_0_16px_rgba(34,211,238,0.2)]",
   },
@@ -81,8 +81,8 @@ function RoadmapPillNodeComponent({ data }: NodeProps<PillNodeData>) {
     >
       <Handle
         type="target"
-        position={Position.Top}
-        className="!w-2 !h-2 !bg-border !border-0 !-top-1"
+        position={Position.Left}
+        className="!w-2 !h-2 !bg-border !border-0 !-left-1"
       />
 
       <div className="flex items-center gap-2.5">
@@ -105,8 +105,8 @@ function RoadmapPillNodeComponent({ data }: NodeProps<PillNodeData>) {
 
       <Handle
         type="source"
-        position={Position.Bottom}
-        className="!w-2 !h-2 !bg-border !border-0 !-bottom-1"
+        position={Position.Right}
+        className="!w-2 !h-2 !bg-border !border-0 !-right-1"
       />
     </div>
   );

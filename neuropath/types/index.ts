@@ -28,6 +28,7 @@ export interface ModuleData {
   description: string;
   estimatedTime: string;
   keyTopics: string[];
+  prerequisites?: string[];
   resourceCounts: {
     lessons: number;
     exercises: number;

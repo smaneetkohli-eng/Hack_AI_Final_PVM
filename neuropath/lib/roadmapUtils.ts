@@ -4,22 +4,25 @@ export function moduleRoadmapToDBNodes(
   roadmap: ModuleRoadmap,
   skillId: string
 ): Omit<DBNode, "id" | "created_at">[] {
-  return roadmap.modules.map((mod: ModuleData) => ({
-    skill_id: skillId,
-    node_key: mod.id,
-    label: mod.label,
-    description: mod.description,
-    tier: null,
-    estimated_time: mod.estimatedTime,
-    key_topics: mod.keyTopics,
-    prerequisites: null,
-    status: "available" as NodeStatus,
-    position_x: null,
-    position_y: null,
-    ai_explanation: null,
-    module_order: mod.order,
-    resource_counts: mod.resourceCounts,
-  }));
+  return roadmap.modules.map((mod: ModuleData) => {
+    const hasPrereqs = mod.prerequisites && mod.prerequisites.length > 0;
+    return {
+      skill_id: skillId,
+      node_key: mod.id,
+      label: mod.label,
+      description: mod.description,
+      tier: null,
+      estimated_time: mod.estimatedTime,
+      key_topics: mod.keyTopics,
+      prerequisites: hasPrereqs ? mod.prerequisites! : null,
+      status: (hasPrereqs ? "locked" : "available") as NodeStatus,
+      position_x: null,
+      position_y: null,
+      ai_explanation: null,
+      module_order: mod.order,
+      resource_counts: mod.resourceCounts,
+    };
+  });
 }
 
 export function getProgressPercent(nodes: DBNode[]): number {

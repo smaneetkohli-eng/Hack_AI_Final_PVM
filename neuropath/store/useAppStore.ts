@@ -19,6 +19,7 @@ interface AppState {
   nodes: DBNode[];
   setNodes: (nodes: DBNode[]) => void;
   updateNodeStatus: (nodeId: string, status: DBNode["status"]) => void;
+  updateNodePosition: (nodeId: string, x: number, y: number) => void;
 
   selectedNodeId: string | null;
   setSelectedNodeId: (id: string | null) => void;
@@ -64,6 +65,12 @@ export const useAppStore = create<AppState>((set) => ({
   updateNodeStatus: (nodeId, status) =>
     set((s) => ({
       nodes: s.nodes.map((n) => (n.id === nodeId ? { ...n, status } : n)),
+    })),
+  updateNodePosition: (nodeId, x, y) =>
+    set((s) => ({
+      nodes: s.nodes.map((n) =>
+        n.id === nodeId ? { ...n, position_x: x, position_y: y } : n
+      ),
     })),
 
   selectedNodeId: null,

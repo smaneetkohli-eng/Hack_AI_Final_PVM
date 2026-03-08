@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { X, Check, ArrowRight, Clock, Lock } from "lucide-react";
+import { X, Check, BookOpen, Clock, Lock, Zap } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import { createClient } from "@/lib/supabase";
 import { getProgressPercent, recalculateStatuses } from "@/lib/roadmapUtils";
@@ -80,18 +80,20 @@ export function PeekPanel({ nodeId, onClose, onDiveDeeper }: PeekPanelProps) {
     onClose();
   };
 
+  const keyTopics = node.key_topics;
+
   return (
     <motion.div
       initial={{ x: "100%" }}
       animate={{ x: 0 }}
       exit={{ x: "100%" }}
       transition={{ type: "spring", damping: 25, stiffness: 300 }}
-      className="absolute right-0 top-0 bottom-0 w-[380px] z-30
+      className="absolute right-0 top-0 bottom-0 w-[400px] z-30
         bg-surface border-l border-border shadow-2xl
         flex flex-col overflow-hidden"
     >
-      <div className="flex items-center justify-between p-5 border-b border-border">
-        <span className="text-[10px] font-bold tracking-widest uppercase text-primary-light">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-primary-light">
           Topic Overview
         </span>
         <button
@@ -102,41 +104,94 @@ export function PeekPanel({ nodeId, onClose, onDiveDeeper }: PeekPanelProps) {
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 space-y-6">
+      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
         <div>
-          <h2 className="font-display text-xl font-bold text-foreground leading-snug">
+          <h2 className="font-display text-2xl font-bold text-foreground leading-snug tracking-tight">
             {node.label}
           </h2>
+          {isLocked && (
+            <div className="flex items-center gap-2 mt-3 px-3 py-2.5 rounded-lg bg-surface-light border border-border">
+              <Lock className="w-4 h-4 text-muted flex-shrink-0" />
+              <p className="text-xs text-muted leading-relaxed">
+                Complete prerequisite modules to unlock this topic.
+              </p>
+            </div>
+          )}
         </div>
 
-        {isLocked && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-light border border-border">
-            <Lock className="w-4 h-4 text-muted flex-shrink-0" />
-            <p className="text-xs text-muted">
-              Complete prerequisite modules to unlock this topic.
-            </p>
-          </div>
-        )}
-
         <div>
-          <h3 className="text-[10px] font-bold tracking-widest uppercase text-muted mb-2">
+          <h3 className="text-[11px] font-bold tracking-[0.12em] uppercase text-muted mb-2">
             Big Picture
           </h3>
-          <p className="text-sm text-foreground/80 leading-relaxed">
+          <p className="text-sm text-foreground/80 leading-[1.7]">
             {node.description || "Explore this topic to deepen your understanding."}
           </p>
         </div>
 
+        {keyTopics && keyTopics.length > 0 && (
+          <div>
+            <h3 className="text-[11px] font-bold tracking-[0.12em] uppercase text-muted mb-2.5">
+              Key Topics
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {keyTopics.map((topic, i) => (
+                <span
+                  key={i}
+                  className="text-xs px-2.5 py-1 rounded-md bg-surface-light border border-border text-foreground/70"
+                >
+                  {topic}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {node.estimated_time && (
-          <div className="flex items-center gap-2 text-sm text-muted">
-            <Clock className="w-4 h-4" />
-            <span>{node.estimated_time}</span>
+          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-surface-light/50 border border-border/50">
+            <Clock className="w-4 h-4 text-secondary-light flex-shrink-0" />
+            <span className="text-sm font-medium text-foreground/80">
+              {node.estimated_time}
+            </span>
+          </div>
+        )}
+
+        {node.resource_counts && (
+          <div>
+            <h3 className="text-[11px] font-bold tracking-[0.12em] uppercase text-muted mb-2.5">
+              Resources
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              {node.resource_counts.lessons > 0 && (
+                <div className="flex items-center gap-2 text-xs text-foreground/70">
+                  <BookOpen className="w-3.5 h-3.5 text-primary-light" />
+                  {node.resource_counts.lessons} Lessons
+                </div>
+              )}
+              {node.resource_counts.exercises > 0 && (
+                <div className="flex items-center gap-2 text-xs text-foreground/70">
+                  <Zap className="w-3.5 h-3.5 text-secondary-light" />
+                  {node.resource_counts.exercises} Exercises
+                </div>
+              )}
+              {node.resource_counts.projects > 0 && (
+                <div className="flex items-center gap-2 text-xs text-foreground/70">
+                  <Zap className="w-3.5 h-3.5 text-success-light" />
+                  {node.resource_counts.projects} Projects
+                </div>
+              )}
+              {node.resource_counts.readings > 0 && (
+                <div className="flex items-center gap-2 text-xs text-foreground/70">
+                  <BookOpen className="w-3.5 h-3.5 text-muted" />
+                  {node.resource_counts.readings} Readings
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
 
-      <div className="p-5 border-t border-border space-y-2">
-        <p className="text-[10px] font-bold tracking-widest uppercase text-muted mb-3">
+      <div className="px-6 py-5 border-t border-border">
+        <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-muted mb-3">
           Actions
         </p>
         <div className="flex gap-3">
@@ -144,14 +199,14 @@ export function PeekPanel({ nodeId, onClose, onDiveDeeper }: PeekPanelProps) {
             onClick={onDiveDeeper}
             disabled={isLocked}
             className="flex-1 flex items-center justify-center gap-2
-              px-4 py-3 rounded-xl border-2 border-border
-              bg-surface-light hover:bg-surface-lighter
-              text-sm font-semibold text-foreground
+              px-4 py-3 rounded-xl border-2 border-primary/40
+              bg-primary/10 hover:bg-primary/20
+              text-sm font-semibold text-primary-light
               transition-all duration-200
               disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <ArrowRight className="w-4 h-4" />
-            Expand Details
+            <BookOpen className="w-4 h-4" />
+            Dive Deeper
           </button>
 
           {isCompleted ? (
@@ -170,13 +225,13 @@ export function PeekPanel({ nodeId, onClose, onDiveDeeper }: PeekPanelProps) {
               disabled={isLocked}
               className="flex-1 flex items-center justify-center gap-2
                 px-4 py-3 rounded-xl
-                bg-red-500/90 hover:bg-red-500 border-2 border-red-500/60
+                bg-success/90 hover:bg-success border-2 border-success/60
                 text-sm font-bold text-white
                 transition-all duration-200
                 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <X className="w-4 h-4" />
-              Done
+              <Check className="w-4 h-4" />
+              Mark Complete
             </button>
           )}
         </div>
