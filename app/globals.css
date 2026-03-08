@@ -3,25 +3,70 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0f;
+  --foreground: #e2e8f0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a3e #0a0a0f;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #2a2a3e;
+  border-radius: 3px;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+@layer components {
+  .node-locked {
+    opacity: 0.15;
+    filter: grayscale(1);
+    pointer-events: none;
+  }
+
+  .node-available {
+    opacity: 0.6;
+    border-color: #6366f140;
+    box-shadow: 0 0 8px #6366f120;
+  }
+
+  .node-available:hover {
+    opacity: 0.8;
+    box-shadow: 0 0 16px #6366f140;
+  }
+
+  .node-active {
+    opacity: 0.85;
+    animation: pulse_border 2s ease-in-out infinite;
+  }
+
+  .node-complete {
+    opacity: 1;
+    box-shadow: 0 0 24px #6366f1, 0 0 48px #6366f180;
+  }
+
+  .node-known {
+    opacity: 1;
+    border-color: #10b981;
+    box-shadow: 0 0 24px #10b981, 0 0 48px #10b98180;
+  }
+
+  .glass {
+    background: rgba(17, 17, 24, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid #2a2a3e;
   }
 }
