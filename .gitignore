@@ -1,9 +1,17 @@
 # Dependencies
 node_modules/
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
 
 # Next.js build output
 .next/
+/.next/
 out/
+
+# production
+/build
 
 # Cursor
 .cursor/
@@ -19,6 +27,13 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# testing
+/coverage
+
+# misc
+.DS_Store
+*.pem
+
 # OS
 .DS_Store
 
@@ -28,8 +43,3 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
-
-# Misc
-*.pem
-.pnp
-.pnp.js
