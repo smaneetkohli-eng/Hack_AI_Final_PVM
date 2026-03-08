@@ -243,35 +243,46 @@ export function ModuleView() {
       exit={{ opacity: 0 }}
       className="absolute inset-0 z-20 bg-background overflow-y-auto"
     >
-      <div className="sticky top-0 z-10 glass-panel border-b border-black/6 rounded-t-2xl">
-        <div className="flex items-center justify-between px-6 py-3 max-w-5xl mx-auto">
-          <button
-            onClick={() => setSelectedNodeId(null)}
-            className="flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Modules
-          </button>
-          <div className="flex items-center gap-2">
-            {!isCompleted && (
-              <>
-                <Button variant="secondary" size="sm" onClick={handleMarkKnown}>
-                  <Eye className="w-3.5 h-3.5" />
-                  Already Know This
-                </Button>
-                <Button size="sm" onClick={handleMarkComplete}>
-                  <Check className="w-3.5 h-3.5" />
-                  Mark Complete
-                </Button>
-              </>
-            )}
-            {isCompleted && (
-              <Badge variant={node.status === "complete" ? "primary" : "success"}>
-                <Check className="w-3 h-3" />
-                {node.status === "complete" ? "Completed" : "Known"}
-              </Badge>
-            )}
-          </div>
+      <div className="sticky top-0 z-10 px-6 py-3 max-w-5xl mx-auto flex items-center justify-between gap-3">
+        <button
+          onClick={() => setSelectedNodeId(null)}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 border border-black/6
+            text-sm text-muted hover:text-foreground hover:bg-white
+            shadow-sm transition-all"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Modules
+        </button>
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border shadow-sm
+          ${isCompleted && node?.status === "complete"
+            ? "bg-primary/10 border-primary/20"
+            : isCompleted && node?.status === "known"
+              ? "bg-emerald-500/10 border-emerald-500/20"
+              : "bg-white/80 border-black/6"
+          }`}>
+          {!isCompleted && (
+            <>
+              <Button variant="secondary" size="sm" onClick={handleMarkKnown}
+                className="rounded-lg"
+              >
+                <Eye className="w-3.5 h-3.5" />
+                Already Know This
+              </Button>
+              <Button size="sm" onClick={handleMarkComplete}
+                className="rounded-lg"
+              >
+                <Check className="w-3.5 h-3.5" />
+                Mark Complete
+              </Button>
+            </>
+          )}
+          {isCompleted && (
+            <span className={`inline-flex items-center gap-1.5 text-sm font-medium
+              ${node.status === "complete" ? "text-primary" : "text-emerald-600"}`}>
+              <Check className="w-3 h-3" />
+              {node.status === "complete" ? "Completed" : "Known"}
+            </span>
+          )}
         </div>
       </div>
 
