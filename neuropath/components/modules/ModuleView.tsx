@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { useAppStore } from "@/store/useAppStore";
 import { ModuleResourcePanel } from "./ModuleResourcePanel";
+import { AIDescriptionContent } from "./AIDescriptionContent";
 import { createClient } from "@/lib/supabase";
 import confetti from "canvas-confetti";
 import { getProgressPercent, recalculateStatuses } from "@/lib/roadmapUtils";
@@ -49,11 +50,15 @@ export function ModuleView() {
   const fetchExplanation = useCallback(async () => {
     if (!node || !skill) return;
 
-    if (node.ai_explanation) {
+    const isFormatted = (text: string) =>
+      /^#{1,3}\s/m.test(text) || (/\*\*[^*]+\*\*/.test(text) && /^\s*[-*]\s/m.test(text));
+
+    if (node.ai_explanation && isFormatted(node.ai_explanation)) {
       setExplanation(node.ai_explanation);
       return;
     }
 
+    setExplanation("");
     setLoadingExplanation(true);
     try {
       const response = await fetch("/api/roadmap/modify", {
@@ -68,6 +73,11 @@ export function ModuleView() {
         }),
       });
 
+      if (!response.ok) {
+        setExplanation(node.description || "Description unavailable.");
+        return;
+      }
+
       if (response.body) {
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -76,8 +86,14 @@ export function ModuleView() {
           const { done, value } = await reader.read();
           if (done) break;
           text += decoder.decode(value);
-          setExplanation(text);
         }
+
+        if (text.includes("<!DOCTYPE") || text.includes("<html")) {
+          setExplanation(node.description || "Description unavailable.");
+          return;
+        }
+
+        setExplanation(text);
 
         const supabase = createClient();
         await supabase
@@ -87,6 +103,7 @@ export function ModuleView() {
       }
     } catch (error) {
       console.error("Error fetching explanation:", error);
+      setExplanation(node.description || "Description unavailable.");
     } finally {
       setLoadingExplanation(false);
     }
@@ -94,7 +111,14 @@ export function ModuleView() {
 
   useEffect(() => {
     if (selectedNodeId && node) {
-      setExplanation(node.ai_explanation || "");
+      const isFormatted = (text: string) =>
+        /^#{1,3}\s/m.test(text) || (/\*\*[^*]+\*\*/.test(text) && /^\s*[-*]\s/m.test(text));
+
+      if (node.ai_explanation && isFormatted(node.ai_explanation)) {
+        setExplanation(node.ai_explanation);
+      } else {
+        setExplanation("");
+      }
       fetchExplanation();
       loadNotes();
       logEvent("node_viewed");
@@ -280,11 +304,16 @@ export function ModuleView() {
                   Generating description...
                 </div>
               ) : (
-                <div className="prose prose-invert prose-sm max-w-none">
-                  <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">
-                    {explanation || node.description}
-                  </p>
-                </div>
+                <motion.div
+                  className="max-w-none"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                >
+                  <AIDescriptionContent
+                    content={explanation || node.description || ""}
+                  />
+                </motion.div>
               )}
               <p className="text-[10px] text-muted mt-4">
                 Generated using Claude API

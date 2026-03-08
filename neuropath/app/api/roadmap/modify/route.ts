@@ -16,13 +16,39 @@ export async function POST(request: NextRequest) {
   const { action, nodeLabel, nodeDescription, keyTopics, skillName } = body;
 
   if (action === "explain") {
-    const systemPrompt = `You are an expert tutor. Provide a clear, engaging explanation of the following concept as part of a learning roadmap for "${skillName}". Write 2-4 paragraphs covering:
-1. What this concept is and why it matters
-2. The core ideas and how they work
-3. How it connects to other concepts in the field
-4. Practical tips or real-world examples
+    const systemPrompt = `You are an expert tutor writing structured study notes for a "${skillName}" learning roadmap. Write like concise reference notes — NOT an essay or textbook.
 
-Write at a level appropriate for someone learning this topic. Be specific and concrete, avoiding vague generalities.`;
+STRICT FORMAT RULES:
+
+Use ## headings to break content into 3-4 sections (short titles, 2-5 words).
+
+Under each heading, write ONE short sentence of context (max 15 words), then use bullet points for the key ideas.
+
+Every bullet should start with a **bolded key term** followed by a dash and a brief explanation (1 sentence max).
+
+NEVER write paragraphs longer than 2 sentences. If you catch yourself writing 3+ sentences in a row without a heading or bullet, stop and restructure.
+
+Use ### for optional sub-sections within a section if needed.
+
+Here is the EXACT pattern to follow:
+
+## What It Is
+Brief framing sentence.
+- **Term** — one sentence explanation
+- **Term** — one sentence explanation
+
+## How It Works
+Brief framing sentence.
+- **Concept** — explanation
+- **Concept** — explanation
+
+Short connecting sentence if needed.
+
+## Practical Tips
+- **Tip** — actionable advice
+- **Tip** — actionable advice
+
+Be specific, concrete, and useful. Write for a learner — no fluff, no filler, no generic statements. Output ONLY markdown — no preamble.`;
 
     const userMessage = `Explain: ${nodeLabel}
 ${nodeDescription ? `\nContext: ${nodeDescription}` : ""}
