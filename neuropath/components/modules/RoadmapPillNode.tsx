@@ -10,58 +10,46 @@ const statusConfig: Record<
   string,
   {
     border: string;
-    bg: string;
     labelBg: string;
     labelText: string;
     labelValue: string;
     icon: React.ReactNode;
-    glow: string;
   }
 > = {
   complete: {
-    border: "border-success/60",
-    bg: "bg-[#0d2818]",
-    labelBg: "bg-success/20",
-    labelText: "text-success-light",
+    border: "border-success/40",
+    labelBg: "bg-success/15",
+    labelText: "text-success",
     labelValue: "COMPLETED",
-    icon: <Check className="w-3.5 h-3.5 text-success-light" />,
-    glow: "shadow-[0_0_16px_rgba(16,185,129,0.25)]",
+    icon: <Check className="w-3.5 h-3.5 text-success" />,
   },
   known: {
-    border: "border-success/50",
-    bg: "bg-[#0d2818]",
-    labelBg: "bg-success/20",
-    labelText: "text-success-light",
+    border: "border-success/30",
+    labelBg: "bg-success/15",
+    labelText: "text-success",
     labelValue: "COMPLETED",
-    icon: <Check className="w-3.5 h-3.5 text-success-light" />,
-    glow: "shadow-[0_0_16px_rgba(16,185,129,0.2)]",
+    icon: <Check className="w-3.5 h-3.5 text-success" />,
   },
   available: {
-    border: "border-primary/50",
-    bg: "bg-[#111130]",
-    labelBg: "bg-primary/15",
-    labelText: "text-primary-light",
+    border: "border-primary/40",
+    labelBg: "bg-primary/10",
+    labelText: "text-primary-dark",
     labelValue: "AVAILABLE",
-    icon: <Sparkles className="w-3.5 h-3.5 text-primary-light" />,
-    glow: "shadow-[0_0_16px_rgba(99,102,241,0.2)]",
+    icon: <Sparkles className="w-3.5 h-3.5 text-primary" />,
   },
   in_progress: {
-    border: "border-secondary/50",
-    bg: "bg-[#0a1a20]",
-    labelBg: "bg-secondary/15",
-    labelText: "text-secondary-light",
+    border: "border-secondary/40",
+    labelBg: "bg-secondary/10",
+    labelText: "text-secondary-dark",
     labelValue: "IN PROGRESS",
-    icon: <Sparkles className="w-3.5 h-3.5 text-secondary-light" />,
-    glow: "shadow-[0_0_16px_rgba(34,211,238,0.2)]",
+    icon: <Sparkles className="w-3.5 h-3.5 text-secondary" />,
   },
   locked: {
     border: "border-border",
-    bg: "bg-surface",
-    labelBg: "bg-surface-lighter",
+    labelBg: "bg-black/5",
     labelText: "text-muted",
     labelValue: "LOCKED",
     icon: <Lock className="w-3.5 h-3.5 text-muted" />,
-    glow: "",
   },
 };
 
@@ -71,12 +59,13 @@ function RoadmapPillNodeComponent({ data }: NodeProps<PillNodeData>) {
   return (
     <div
       className={`
-        relative px-5 py-3.5 rounded-xl border-2
+        relative px-5 py-3.5 rounded-2xl border
         min-w-[220px] max-w-[260px]
         cursor-pointer select-none
         transition-all duration-200
-        hover:scale-[1.03] hover:brightness-110
-        ${config.border} ${config.bg} ${config.glow}
+        glass-node
+        hover:scale-[1.02] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]
+        ${config.border}
       `}
     >
       <Handle

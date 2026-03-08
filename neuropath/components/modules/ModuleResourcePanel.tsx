@@ -206,16 +206,16 @@ export function ModuleResourcePanel({ nodeId, nodeLabel, skillName }: ModuleReso
         ))
       )}
 
-      <div className="pt-3 border-t border-border">
+      <div className="pt-3 border-t border-black/6">
         {showSuggest ? (
           <div className="flex gap-2">
             <input
               value={suggestUrl}
               onChange={(e) => setSuggestUrl(e.target.value)}
               placeholder="Paste a URL..."
-              className="flex-1 bg-surface-light border border-border rounded-lg px-3 py-2 text-sm
+              className="flex-1 bg-black/4 border border-black/8 rounded-xl px-3 py-2 text-sm
                 text-foreground placeholder:text-muted/50
-                focus:outline-none focus:border-primary transition-colors"
+                focus:outline-none focus:border-primary/40 transition-colors"
             />
             <Button size="sm" onClick={handleSuggest}>
               Add
@@ -252,11 +252,11 @@ function ResourceRow({
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => onResourceClick(resource)}
-      className="flex gap-3 p-3 rounded-xl bg-surface border border-border
-        hover:border-border-light hover:bg-surface-light
+      className="flex gap-3 p-3 rounded-xl bg-white/80 border border-black/6
+        hover:border-black/10 hover:bg-white
         transition-all duration-200 group"
     >
-      <div className="w-9 h-9 rounded-lg bg-surface-lighter flex items-center justify-center flex-shrink-0">
+      <div className="w-9 h-9 rounded-xl bg-black/5 flex items-center justify-center flex-shrink-0">
         {isVideo ? (
           <Play className="w-4 h-4 text-secondary" />
         ) : (

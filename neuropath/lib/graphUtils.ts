@@ -151,10 +151,10 @@ export function getEdgeStyle(
   }
 
   return {
-    stroke: "#334155",
+    stroke: "#94a3b8",
     strokeWidth: 1.5,
     strokeDasharray: "4 4",
-    opacity: 0.4,
+    opacity: 0.6,
     animated: true,
   };
 }
@@ -174,5 +174,5 @@ export function getEdgeMarker(
   if (sourceComplete) {
     return { type: MarkerType.ArrowClosed, color: "#6366f1", width: 18, height: 18 };
   }
-  return { type: MarkerType.ArrowClosed, color: "#334155", width: 16, height: 16 };
+  return { type: MarkerType.ArrowClosed, color: "#94a3b8", width: 16, height: 16 };
 }

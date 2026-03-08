@@ -114,10 +114,10 @@ export function AgentBubble() {
   const bubble = (
     <button
       onClick={() => setIsAgentExpanded(!isAgentExpanded)}
-      className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-surface border border-border shadow-lg flex items-center justify-center hover:scale-105 hover:border-primary/50 transition-all duration-200"
+      className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full glass-panel-strong shadow-[0_8px_32px_rgba(0,0,0,0.08)] flex items-center justify-center hover:scale-105 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] transition-all duration-200 border border-black/5"
       aria-label={isAgentExpanded ? "Close agent" : "Open agent"}
     >
-      <Wand2 className="w-7 h-7 text-primary-light" />
+      <Wand2 className="w-7 h-7 text-primary" />
     </button>
   );
 
@@ -128,9 +128,9 @@ export function AgentBubble() {
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: 10 }}
       transition={{ duration: 0.2 }}
-      className="fixed bottom-20 right-6 z-50 w-[380px] max-h-[420px] flex flex-col rounded-xl border border-border bg-surface shadow-xl overflow-hidden"
+      className="fixed bottom-20 right-6 z-50 w-[380px] max-h-[420px] flex flex-col rounded-2xl glass-panel-strong shadow-[0_12px_48px_rgba(0,0,0,0.1)] overflow-hidden border border-black/5"
     >
-      <div className="p-3 border-b border-border flex items-center justify-between">
+      <div className="p-3 border-b border-black/6 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
             <Wand2 className="w-4 h-4 text-primary-light" />
@@ -179,7 +179,7 @@ export function AgentBubble() {
                   className={`max-w-[85%] rounded-xl px-3 py-2 text-sm leading-relaxed ${
                     msg.role === "user"
                       ? "bg-primary text-white rounded-br-sm"
-                      : "bg-surface-light text-foreground rounded-bl-sm"
+                      : "bg-black/5 text-foreground rounded-bl-sm"
                   }`}
                 >
                   <p className="whitespace-pre-wrap">{msg.content}</p>
@@ -208,7 +208,7 @@ export function AgentBubble() {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-3 border-t border-border">
+      <div className="p-3 border-t border-black/6">
         <div className="flex gap-2">
           <input
             value={input}
@@ -216,7 +216,7 @@ export function AgentBubble() {
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
             placeholder="Add a source, modify roadmap..."
             disabled={isStreaming}
-            className="flex-1 bg-surface-light border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted/50 focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
+            className="flex-1 bg-black/4 border border-black/8 rounded-full px-3 py-2 text-sm text-foreground placeholder:text-muted/50 focus:outline-none focus:border-primary/40 transition-colors disabled:opacity-50"
           />
           <button
             onClick={handleSend}

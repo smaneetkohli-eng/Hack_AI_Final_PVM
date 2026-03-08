@@ -177,14 +177,18 @@ export function Sidebar() {
     <>
       <aside
         className={`
-          w-60 border-r border-border bg-surface flex flex-col
+          w-60 flex flex-col
           transition-transform duration-300 ease-out
           fixed lg:relative inset-y-0 left-0 z-40
           ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+          m-3 lg:my-3 lg:ml-3
+          glass-panel rounded-2xl
+          shadow-[0_8px_32px_rgba(0,0,0,0.06)]
+          overflow-hidden
         `}
       >
         {/* Profile Section */}
-        <div className="px-4 pt-5 pb-4 border-b border-border">
+        <div className="px-4 pt-5 pb-4">
           <div className="flex items-center gap-3 mb-3">
             {avatarUrl ? (
               <img
@@ -212,8 +216,7 @@ export function Sidebar() {
             onClick={() => setShowProfilePage(true)}
             onMouseEnter={() => setIsProfileBarHovered(true)}
             onMouseLeave={() => setIsProfileBarHovered(false)}
-            className="w-full h-9 rounded-lg bg-surface-light border border-border
-              hover:border-border-light hover:bg-surface-lighter
+            className="w-full h-9 rounded-full bg-black/5 hover:bg-black/10
               transition-colors duration-200 flex items-center justify-center overflow-hidden"
           >
             <div className="flex items-center justify-center gap-2">
@@ -242,7 +245,7 @@ export function Sidebar() {
             onClick={() => setShowSkillIntakeModal(true)}
             onMouseEnter={() => setIsNewSkillHovered(true)}
             onMouseLeave={() => setIsNewSkillHovered(false)}
-            className="w-full h-9 rounded-lg bg-primary/10 hover:bg-primary/20
+            className="w-full h-9 rounded-full bg-primary/10 hover:bg-primary/15
               transition-colors duration-200 flex items-center justify-center overflow-hidden"
           >
             <div className="flex items-center justify-center gap-2">
@@ -282,31 +285,31 @@ export function Sidebar() {
               const isPinned = pinnedSkillIds.includes(skill.id);
 
               return (
-                <div key={skill.id}>
+                <div key={skill.id} className="px-2">
                   <button
                     onClick={() => handleSelectSkill(skill.id)}
                     className={`
-                      w-full text-left px-4 py-3 flex items-center gap-3
-                      transition-colors duration-150 group
-                      ${isActive ? "bg-primary/10 border-r-2 border-primary" : "hover:bg-surface-light"}
+                      w-full text-left px-4 py-3 flex items-center gap-3 rounded-full
+                      transition-all duration-200 group
+                      ${isActive ? "bg-[#1a1a1a] text-white shadow-sm" : "hover:bg-black/5 text-foreground"}
                     `}
                   >
                     <ChevronRight
-                      className={`w-4 h-4 text-muted transition-transform duration-200 ${
-                        isExpanded ? "rotate-90 text-primary" : ""
-                      }`}
+                      className={`w-4 h-4 transition-transform duration-200 ${
+                        isExpanded ? "rotate-90" : ""
+                      } ${isActive ? "text-white/80" : "text-muted"}`}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <p
                           className={`text-sm font-medium truncate ${
-                            isActive ? "text-foreground" : "text-muted"
+                            isActive ? "text-white" : "text-foreground"
                           }`}
                         >
                           {skill.name}
                         </p>
                         {isPinned && (
-                          <Pin className="w-3 h-3 text-primary-light flex-shrink-0 rotate-45" />
+                          <Pin className={`w-3 h-3 flex-shrink-0 rotate-45 ${isActive ? "text-white/80" : "text-primary-light"}`} />
                         )}
                       </div>
                     </div>
@@ -314,7 +317,7 @@ export function Sidebar() {
 
                   {/* Expanded Content */}
                   {isExpanded && (
-                    <div className="px-4 pb-2 pl-11">
+                    <div className="px-4 pb-2 pl-11 pr-2">
                       <div className="flex items-center gap-2">
                         <ProgressBar value={progress} className="flex-1" />
                         <span className="text-xs text-muted tabular-nums w-8 text-right">
@@ -346,7 +349,7 @@ export function Sidebar() {
           />
           <div
             ref={menuRef}
-            className="fixed z-50 bg-surface border border-border rounded-lg shadow-xl py-1 min-w-[160px]"
+            className="fixed z-50 glass-panel-strong rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] py-1 min-w-[160px]"
             style={{ top: menuPos.y, left: menuPos.x }}
           >
             <button

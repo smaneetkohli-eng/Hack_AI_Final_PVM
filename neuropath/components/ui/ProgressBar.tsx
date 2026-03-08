@@ -11,7 +11,7 @@ export function ProgressBar({ value, className = "", showLabel = false }: Progre
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <div className="flex-1 h-1.5 rounded-full bg-surface-lighter overflow-hidden">
+      <div className="flex-1 h-1.5 rounded-full bg-black/10 overflow-hidden">
         <div
           className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-500 ease-out"
           style={{ width: `${clamped}%` }}

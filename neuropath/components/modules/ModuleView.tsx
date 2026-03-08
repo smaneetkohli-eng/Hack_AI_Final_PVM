@@ -243,7 +243,7 @@ export function ModuleView() {
       exit={{ opacity: 0 }}
       className="absolute inset-0 z-20 bg-background overflow-y-auto"
     >
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border">
+      <div className="sticky top-0 z-10 glass-panel border-b border-black/6 rounded-t-2xl">
         <div className="flex items-center justify-between px-6 py-3 max-w-5xl mx-auto">
           <button
             onClick={() => setSelectedNodeId(null)}
@@ -293,7 +293,7 @@ export function ModuleView() {
 
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="flex-1 space-y-6">
-            <div className="bg-surface border border-border rounded-xl p-6">
+            <div className="glass-panel rounded-2xl p-6 border border-black/6">
               <h3 className="font-display text-sm font-semibold mb-3 flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-secondary" />
                 AI Generated Description
@@ -321,7 +321,7 @@ export function ModuleView() {
             </div>
 
             {node.key_topics && (node.key_topics as string[]).length > 0 && (
-              <div className="bg-surface border border-border rounded-xl p-6">
+              <div className="glass-panel rounded-2xl p-6 border border-black/6">
                 <h3 className="font-display text-sm font-semibold mb-3 flex items-center gap-2">
                   <Layers className="w-4 h-4 text-primary-light" />
                   Key Topics
@@ -336,7 +336,7 @@ export function ModuleView() {
               </div>
             )}
 
-            <div className="bg-surface border border-border rounded-xl p-6">
+            <div className="glass-panel rounded-2xl p-6 border border-black/6">
               <h3 className="font-display text-sm font-semibold mb-3 flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-secondary" />
                 Your Notes
@@ -346,9 +346,9 @@ export function ModuleView() {
                 onChange={(e) => setNotes(e.target.value)}
                 onBlur={saveNotes}
                 placeholder="Take notes as you learn..."
-                className="w-full bg-surface-light border border-border rounded-lg px-4 py-3
+                className="w-full bg-black/4 border border-black/8 rounded-xl px-4 py-3
                   text-sm text-foreground placeholder:text-muted/50 resize-none min-h-[120px]
-                  focus:outline-none focus:border-primary transition-colors"
+                  focus:outline-none focus:border-primary/40 transition-colors"
               />
               {savingNotes && (
                 <p className="text-xs text-muted mt-1">Saving...</p>
@@ -356,7 +356,7 @@ export function ModuleView() {
             </div>
           </div>
 
-          <div className="w-full lg:w-96">
+          <div className="w-full lg:w-96 glass-panel rounded-2xl p-6 border border-black/6 self-start">
             <ModuleResourcePanel
               nodeId={node.id}
               nodeLabel={node.label}

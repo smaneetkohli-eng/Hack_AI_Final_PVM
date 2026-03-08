@@ -9,8 +9,8 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#0a0a0f",
-        foreground: "#e2e8f0",
+        background: "#f0f0f2",
+        foreground: "#1a1a1a",
         primary: {
           DEFAULT: "#6366f1",
           light: "#818cf8",
@@ -26,25 +26,31 @@ const config: Config = {
           light: "#34d399",
         },
         surface: {
-          DEFAULT: "#111118",
-          light: "#1a1a24",
-          lighter: "#24243a",
+          DEFAULT: "#ffffff",
+          light: "#f8f8fa",
+          lighter: "#f0f0f2",
         },
         border: {
-          DEFAULT: "#2a2a3e",
-          light: "#3a3a52",
+          DEFAULT: "rgba(0, 0, 0, 0.06)",
+          light: "rgba(0, 0, 0, 0.08)",
         },
-        muted: "#64748b",
+        muted: "#6b7280",
       },
       fontFamily: {
         display: ["var(--font-syne)", "sans-serif"],
         body: ["var(--font-dm-sans)", "sans-serif"],
+        title: ["var(--font-dm-sans)", "sans-serif"],
+      },
+      fontWeight: {
+        "title-zen": "500",
       },
       boxShadow: {
         glow: "0 0 24px #6366f1, 0 0 48px #6366f180",
         "glow-sm": "0 0 12px #6366f180",
         "glow-green": "0 0 24px #10b981, 0 0 48px #10b98180",
         "glow-cyan": "0 0 12px #22d3ee80",
+        "glass": "0 4px 24px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
+        "glass-float": "0 8px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
       },
       keyframes: {
         pulse_border: {

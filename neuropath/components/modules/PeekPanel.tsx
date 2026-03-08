@@ -103,8 +103,8 @@ export function PeekPanel({ nodeId, onClose, onDiveDeeper }: PeekPanelProps) {
         transition={{ type: "spring", damping: 28, stiffness: 300 }}
         className="relative z-30
           w-[min(360px,calc(100vw-3rem))]
-          bg-surface/95 backdrop-blur-md
-          border border-border/80 rounded-2xl shadow-2xl shadow-black/25
+          glass-panel-strong rounded-2xl
+          shadow-[0_12px_48px_rgba(0,0,0,0.1)]
           overflow-hidden"
       >
         <div className="p-5 space-y-4">
@@ -114,14 +114,14 @@ export function PeekPanel({ nodeId, onClose, onDiveDeeper }: PeekPanelProps) {
             </h2>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-surface-light transition-colors text-muted hover:text-foreground flex-shrink-0"
+              className="p-1.5 rounded-full hover:bg-black/5 transition-colors text-muted hover:text-foreground flex-shrink-0"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {isLocked && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-light border border-border">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-black/5 border border-black/6">
               <Lock className="w-3.5 h-3.5 text-muted flex-shrink-0" />
               <p className="text-xs text-muted leading-relaxed">
                 Complete prerequisite modules to unlock this topic.
@@ -148,7 +148,7 @@ export function PeekPanel({ nodeId, onClose, onDiveDeeper }: PeekPanelProps) {
                 {keyTopics.map((topic, i) => (
                   <span
                     key={i}
-                    className="text-xs px-2 py-0.5 rounded-md bg-surface-light/80 border border-border/60 text-foreground/70"
+                    className="text-xs px-2 py-0.5 rounded-lg bg-black/5 border border-black/6 text-foreground/80"
                   >
                     {topic}
                   </span>

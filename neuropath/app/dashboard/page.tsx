@@ -117,7 +117,7 @@ export default function DashboardPage() {
       <div className="flex-1 flex overflow-hidden">
         <Sidebar />
 
-        <main className="flex-1 relative overflow-hidden flex flex-col">
+        <main className="flex-1 relative overflow-hidden flex flex-col m-3 rounded-2xl">
           <AnimatePresence mode="wait">
             {showProfilePage ? (
               <ProfilePage key="profile" />

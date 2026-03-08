@@ -7,11 +7,11 @@ export function Header() {
   const { user, isSidebarOpen, setIsSidebarOpen } = useAppStore();
 
   return (
-    <header className="h-14 border-b border-border bg-surface/80 backdrop-blur-xl flex items-center justify-between px-4 z-50">
+    <header className="h-14 border-b border-black/6 glass-panel flex items-center justify-between px-4 z-50">
       <div className="flex items-center gap-3">
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-2 rounded-lg hover:bg-surface-light transition-colors lg:hidden"
+          className="p-2 rounded-full hover:bg-black/5 transition-colors lg:hidden"
         >
           <Menu className="w-5 h-5 text-muted" />
         </button>
@@ -27,7 +27,7 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-2">
-        <button className="p-2 rounded-lg hover:bg-surface-light transition-colors">
+        <button className="p-2 rounded-full hover:bg-black/5 transition-colors">
           <Settings className="w-5 h-5 text-muted" />
         </button>
         {user && (

@@ -236,19 +236,21 @@ export function RoadmapGraph() {
     <div className="flex-1 flex flex-col overflow-hidden">
       {activeSkill && (
         <div className="px-6 pt-6 pb-2">
-          <div className="flex items-center gap-3 mb-2">
-            <Sparkles className="w-5 h-5 text-primary-light" />
-            <h1 className="font-display text-2xl font-bold text-foreground">
-              {activeSkill.name}
-            </h1>
+          <div className="inline-flex flex-col gap-2 p-4 rounded-2xl glass-panel shadow-[0_4px_24px_rgba(0,0,0,0.04)]">
+            <div className="flex items-center gap-3">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <h1 className="font-title text-xl font-medium text-foreground tracking-tight">
+                {activeSkill.name}
+              </h1>
+            </div>
+            <div className="max-w-xs">
+              <ProgressBar value={progress} showLabel className="mt-1" />
+            </div>
+            <p className="text-sm text-muted">
+              {skillModules.length} modules
+              {progress > 0 && ` \u00b7 ${progress}% complete`}
+            </p>
           </div>
-          <div className="max-w-xs">
-            <ProgressBar value={progress} showLabel className="mt-1" />
-          </div>
-          <p className="text-sm text-muted mt-2">
-            {skillModules.length} modules
-            {progress > 0 && ` \u00b7 ${progress}% complete`}
-          </p>
         </div>
       )}
 
@@ -271,10 +273,10 @@ export function RoadmapGraph() {
           minZoom={0.3}
           maxZoom={1.5}
         >
-          <Background color="#1e1e2e" gap={20} size={1} />
+          <Background color="#e5e5e7" gap={20} size={1} />
           <Controls
             showInteractive={false}
-            className="!bg-surface !border-border !rounded-lg !shadow-lg [&>button]:!bg-surface [&>button]:!border-border [&>button]:!text-foreground [&>button:hover]:!bg-surface-light"
+            className="!rounded-xl !shadow-glass glass-controls [&>button]:!text-foreground"
           />
         </ReactFlow>
       </div>
