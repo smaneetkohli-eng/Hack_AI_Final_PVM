@@ -63,14 +63,9 @@ export function PeekPanel({ nodeId, onClose, onDiveDeeper }: PeekPanelProps) {
     }
 
     const progress = getProgressPercent(recalculated);
-    if (
-      progress === 25 ||
-      progress === 50 ||
-      progress === 75 ||
-      progress === 100
-    ) {
+    if (progress === 100) {
       confetti({
-        particleCount: progress === 100 ? 200 : 80,
+        particleCount: 200,
         spread: 70,
         origin: { y: 0.6 },
         colors: ["#6366f1", "#22d3ee", "#10b981"],
