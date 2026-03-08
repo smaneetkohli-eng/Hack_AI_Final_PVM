@@ -55,7 +55,7 @@ function classifyResource(r: DBNodeResource): ResourceType {
 }
 
 export function ModuleResourcePanel({ nodeId, nodeLabel, skillName }: ModuleResourcePanelProps) {
-  const { user } = useAppStore();
+  const { user, invalidateResourcesNodeId, setInvalidateResourcesNodeId } = useAppStore();
   const [resources, setResources] = useState<DBNodeResource[]>([]);
   const [loading, setLoading] = useState(true);
   const [regenerating, setRegenerating] = useState(false);
@@ -80,6 +80,13 @@ export function ModuleResourcePanel({ nodeId, nodeLabel, skillName }: ModuleReso
   useEffect(() => {
     fetchResources();
   }, [fetchResources]);
+
+  useEffect(() => {
+    if (invalidateResourcesNodeId === nodeId) {
+      fetchResources();
+      setInvalidateResourcesNodeId(null);
+    }
+  }, [invalidateResourcesNodeId, nodeId, fetchResources, setInvalidateResourcesNodeId]);
 
   const handleRegenerate = async () => {
     setRegenerating(true);

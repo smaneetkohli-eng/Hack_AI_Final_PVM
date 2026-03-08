@@ -31,6 +31,16 @@ interface AppState {
   setChatMessages: (messages: DBChatMessage[]) => void;
   addChatMessage: (message: DBChatMessage) => void;
 
+  agentMessages: DBChatMessage[];
+  setAgentMessages: (messages: DBChatMessage[]) => void;
+  addAgentMessage: (message: DBChatMessage) => void;
+
+  isAgentExpanded: boolean;
+  setIsAgentExpanded: (open: boolean) => void;
+
+  invalidateResourcesNodeId: string | null;
+  setInvalidateResourcesNodeId: (id: string | null) => void;
+
   showProfileModal: boolean;
   setShowProfileModal: (show: boolean) => void;
 
@@ -97,6 +107,17 @@ export const useAppStore = create<AppState>((set) => ({
   setChatMessages: (messages) => set({ chatMessages: messages }),
   addChatMessage: (message) =>
     set((s) => ({ chatMessages: [...s.chatMessages, message] })),
+
+  agentMessages: [],
+  setAgentMessages: (messages) => set({ agentMessages: messages }),
+  addAgentMessage: (message) =>
+    set((s) => ({ agentMessages: [...s.agentMessages, message] })),
+
+  isAgentExpanded: false,
+  setIsAgentExpanded: (open) => set({ isAgentExpanded: open }),
+
+  invalidateResourcesNodeId: null,
+  setInvalidateResourcesNodeId: (id) => set({ invalidateResourcesNodeId: id }),
 
   showProfileModal: false,
   setShowProfileModal: (show) => set({ showProfileModal: show }),

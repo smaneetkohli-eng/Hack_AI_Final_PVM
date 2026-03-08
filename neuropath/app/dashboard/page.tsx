@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { ChatPanel } from "@/components/layout/ChatPanel";
+import { AgentBubble } from "@/components/layout/AgentBubble";
 import { RoadmapGraph } from "@/components/modules/RoadmapGraph";
 import { PeekPanel } from "@/components/modules/PeekPanel";
 import { ModuleView } from "@/components/modules/ModuleView";
@@ -151,9 +151,9 @@ export default function DashboardPage() {
             )}
           </AnimatePresence>
         </main>
-
-        <ChatPanel />
       </div>
+
+      <AgentBubble />
 
       <ProfileSetupModal />
       <SkillIntakeModal />
