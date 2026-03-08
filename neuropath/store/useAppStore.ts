@@ -42,6 +42,17 @@ interface AppState {
 
   isChatOpen: boolean;
   setIsChatOpen: (open: boolean) => void;
+
+  showProfilePage: boolean;
+  setShowProfilePage: (show: boolean) => void;
+
+  pinnedSkillIds: string[];
+  setPinnedSkillIds: (ids: string[]) => void;
+  pinSkill: (id: string) => void;
+  unpinSkill: (id: string) => void;
+
+  expandedSkillId: string | null;
+  setExpandedSkillId: (id: string | null) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -55,7 +66,10 @@ export const useAppStore = create<AppState>((set) => ({
   setSkills: (skills) => set({ skills }),
   addSkill: (skill) => set((s) => ({ skills: [...s.skills, skill] })),
   removeSkill: (id) =>
-    set((s) => ({ skills: s.skills.filter((sk) => sk.id !== id) })),
+    set((s) => ({
+      skills: s.skills.filter((sk) => sk.id !== id),
+      pinnedSkillIds: s.pinnedSkillIds.filter((pid) => pid !== id),
+    })),
 
   activeSkillId: null,
   setActiveSkillId: (id) => set({ activeSkillId: id }),
@@ -95,4 +109,23 @@ export const useAppStore = create<AppState>((set) => ({
 
   isChatOpen: true,
   setIsChatOpen: (open) => set({ isChatOpen: open }),
+
+  showProfilePage: false,
+  setShowProfilePage: (show) => set({ showProfilePage: show }),
+
+  pinnedSkillIds: [],
+  setPinnedSkillIds: (ids) => set({ pinnedSkillIds: ids }),
+  pinSkill: (id) =>
+    set((s) => ({
+      pinnedSkillIds: s.pinnedSkillIds.includes(id)
+        ? s.pinnedSkillIds
+        : [...s.pinnedSkillIds, id],
+    })),
+  unpinSkill: (id) =>
+    set((s) => ({
+      pinnedSkillIds: s.pinnedSkillIds.filter((pid) => pid !== id),
+    })),
+
+  expandedSkillId: null,
+  setExpandedSkillId: (id) => set({ expandedSkillId: id }),
 }));
