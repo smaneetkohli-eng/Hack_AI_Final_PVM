@@ -40,6 +40,16 @@ const markdownComponents = {
   em: ({ children }: { children?: React.ReactNode }) => (
     <em className="text-foreground/90 italic">{children}</em>
   ),
+  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-primary-light hover:text-primary underline underline-offset-2 decoration-primary-light/40 hover:decoration-primary transition-colors"
+    >
+      {children}
+    </a>
+  ),
 };
 
 interface AIDescriptionContentProps {

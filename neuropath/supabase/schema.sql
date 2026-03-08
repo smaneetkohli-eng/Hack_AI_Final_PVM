@@ -1,4 +1,4 @@
-  -- NeuroPath Database Schema
+  -- Tesseract Database Schema
 
 -- User Profiles
 -- metadata JSONB stores: { display_name, avatar_url, pinned_skill_ids[] }

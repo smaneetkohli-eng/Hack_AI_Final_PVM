@@ -59,8 +59,8 @@ function RoadmapPillNodeComponent({ data }: NodeProps<PillNodeData>) {
   return (
     <div
       className={`
-        relative px-5 py-3.5 rounded-2xl border
-        min-w-[220px] max-w-[260px]
+        relative px-5 py-4 rounded-2xl border
+        min-w-[220px] max-w-[280px]
         cursor-pointer select-none
         transition-all duration-200
         glass-node
@@ -86,7 +86,7 @@ function RoadmapPillNodeComponent({ data }: NodeProps<PillNodeData>) {
           >
             {config.labelValue}
           </span>
-          <p className="text-sm font-semibold text-foreground leading-tight truncate">
+          <p className="text-sm font-semibold text-foreground leading-tight break-words whitespace-normal">
             {data.label}
           </p>
         </div>

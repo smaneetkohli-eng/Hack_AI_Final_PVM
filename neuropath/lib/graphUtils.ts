@@ -2,8 +2,8 @@ import dagre from "dagre";
 import { MarkerType, type Node, type Edge } from "reactflow";
 import type { DBNode } from "@/types";
 
-const NODE_WIDTH = 260;
-const NODE_HEIGHT = 70;
+const NODE_WIDTH = 280;
+const NODE_HEIGHT = 88;
 
 export interface PillNodeData {
   label: string;

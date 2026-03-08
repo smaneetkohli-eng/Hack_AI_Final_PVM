@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     ?.filter((n: { status: string }) => n.status === "available" || n.status === "in_progress")
     .map((n: { label: string }) => n.label) || [];
 
-  const systemPrompt = `You are an expert AI learning adviser for NeuroPath. You are helping a user learn "${skillName || "a skill"}".
+  const systemPrompt = `You are an expert AI learning adviser for Tesseract. You are helping a user learn "${skillName || "a skill"}".
 
 ${profile ? `User profile:
 - Field: ${profile.field || "Not specified"}

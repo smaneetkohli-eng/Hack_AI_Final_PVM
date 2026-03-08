@@ -40,6 +40,7 @@ const config: Config = {
         display: ["var(--font-syne)", "sans-serif"],
         body: ["var(--font-dm-sans)", "sans-serif"],
         title: ["var(--font-dm-sans)", "sans-serif"],
+        brand: ["var(--font-space-grotesk)", "sans-serif"],
       },
       fontWeight: {
         "title-zen": "500",

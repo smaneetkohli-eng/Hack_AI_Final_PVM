@@ -11,12 +11,13 @@ import {
   Loader2,
   Eye,
   Sparkles,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { useAppStore } from "@/store/useAppStore";
-import { ModuleResourcePanel } from "./ModuleResourcePanel";
 import { AIDescriptionContent } from "./AIDescriptionContent";
+import { ModuleResourcePanel } from "./ModuleResourcePanel";
 import { createClient } from "@/lib/supabase";
 import confetti from "canvas-confetti";
 import { getProgressPercent, recalculateStatuses } from "@/lib/roadmapUtils";
@@ -47,13 +48,13 @@ export function ModuleView() {
       .findIndex((n) => n.id === selectedNodeId) + 1
   );
 
-  const fetchExplanation = useCallback(async () => {
-    if (!node || !skill) return;
+  const isStepsFormat = (text: string) =>
+    /^##\s+Step\s+\d/m.test(text);
 
-    const isFormatted = (text: string) =>
-      /^#{1,3}\s/m.test(text) || (/\*\*[^*]+\*\*/.test(text) && /^\s*[-*]\s/m.test(text));
+  const fetchLearningSteps = useCallback(async (force = false) => {
+    if (!node) return;
 
-    if (node.ai_explanation && isFormatted(node.ai_explanation)) {
+    if (!force && node.ai_explanation && isStepsFormat(node.ai_explanation)) {
       setExplanation(node.ai_explanation);
       return;
     }
@@ -61,20 +62,14 @@ export function ModuleView() {
     setExplanation("");
     setLoadingExplanation(true);
     try {
-      const response = await fetch("/api/roadmap/modify", {
+      const response = await fetch("/api/roadmap/learning-steps", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "explain",
-          nodeLabel: node.label,
-          nodeDescription: node.description,
-          keyTopics: node.key_topics,
-          skillName: skill.name,
-        }),
+        body: JSON.stringify({ nodeId: node.id, force }),
       });
 
       if (!response.ok) {
-        setExplanation(node.description || "Description unavailable.");
+        setExplanation(node.description || "Learning steps unavailable.");
         return;
       }
 
@@ -85,41 +80,32 @@ export function ModuleView() {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          text += decoder.decode(value);
+          const chunk = decoder.decode(value);
+          text += chunk;
+          setExplanation(text);
         }
 
         if (text.includes("<!DOCTYPE") || text.includes("<html")) {
-          setExplanation(node.description || "Description unavailable.");
+          setExplanation(node.description || "Learning steps unavailable.");
           return;
         }
-
-        setExplanation(text);
-
-        const supabase = createClient();
-        await supabase
-          .from("nodes")
-          .update({ ai_explanation: text })
-          .eq("id", node.id);
       }
     } catch (error) {
-      console.error("Error fetching explanation:", error);
-      setExplanation(node.description || "Description unavailable.");
+      console.error("Error fetching learning steps:", error);
+      setExplanation(node.description || "Learning steps unavailable.");
     } finally {
       setLoadingExplanation(false);
     }
-  }, [node, skill]);
+  }, [node]);
 
   useEffect(() => {
     if (selectedNodeId && node) {
-      const isFormatted = (text: string) =>
-        /^#{1,3}\s/m.test(text) || (/\*\*[^*]+\*\*/.test(text) && /^\s*[-*]\s/m.test(text));
-
-      if (node.ai_explanation && isFormatted(node.ai_explanation)) {
+      if (node.ai_explanation && isStepsFormat(node.ai_explanation)) {
         setExplanation(node.ai_explanation);
       } else {
         setExplanation("");
       }
-      fetchExplanation();
+      fetchLearningSteps();
       loadNotes();
       logEvent("node_viewed");
     }
@@ -243,7 +229,7 @@ export function ModuleView() {
       exit={{ opacity: 0 }}
       className="absolute inset-0 z-20 bg-background overflow-y-auto"
     >
-      <div className="sticky top-0 z-10 px-6 py-3 max-w-5xl mx-auto flex items-center justify-between gap-3">
+      <div className="sticky top-0 z-10 px-6 py-3 max-w-6xl mx-auto flex items-center justify-between gap-3">
         <button
           onClick={() => setSelectedNodeId(null)}
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 border border-black/6
@@ -286,7 +272,7 @@ export function ModuleView() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="w-full max-w-6xl mx-auto px-6 py-8">
         <div className="mb-8">
           <p className="text-sm font-medium text-primary-light mb-1">
             Module {moduleNumber}
@@ -302,78 +288,91 @@ export function ModuleView() {
           )}
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="flex-1 space-y-6">
-            <div className="glass-panel rounded-2xl p-6 border border-black/6">
-              <h3 className="font-display text-sm font-semibold mb-3 flex items-center gap-2">
+        <div className="flex gap-8 items-start">
+          <div className="flex-1 min-w-0 max-w-3xl space-y-6">
+          <div className="glass-panel rounded-2xl p-6 border border-black/6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display text-sm font-semibold flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-secondary" />
-                AI Generated Description
+                Learning Path
               </h3>
-              {loadingExplanation && !explanation ? (
-                <div className="flex items-center gap-2 text-sm text-muted">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Generating description...
-                </div>
-              ) : (
-                <motion.div
-                  className="max-w-none"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                >
-                  <AIDescriptionContent
-                    content={explanation || node.description || ""}
-                  />
-                </motion.div>
-              )}
-              <p className="text-[10px] text-muted mt-4">
-                Generated using Claude API
-              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => fetchLearningSteps(true)}
+                loading={loadingExplanation}
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                Regenerate
+              </Button>
             </div>
-
-            {node.key_topics && (node.key_topics as string[]).length > 0 && (
-              <div className="glass-panel rounded-2xl p-6 border border-black/6">
-                <h3 className="font-display text-sm font-semibold mb-3 flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-primary-light" />
-                  Key Topics
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {(node.key_topics as string[]).map((topic) => (
-                    <Badge key={topic} variant="default">
-                      {topic}
-                    </Badge>
-                  ))}
-                </div>
+            {loadingExplanation && !explanation ? (
+              <div className="flex items-center gap-2 text-sm text-muted py-6">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Generating learning steps...
               </div>
+            ) : (
+              <motion.div
+                className="max-w-none"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              >
+                <AIDescriptionContent
+                  content={explanation || node.description || ""}
+                />
+              </motion.div>
             )}
+            <p className="text-[10px] text-muted mt-4">
+              Generated using Claude API &middot; Resources embedded in steps
+            </p>
+          </div>
 
+          {node.key_topics && (node.key_topics as string[]).length > 0 && (
             <div className="glass-panel rounded-2xl p-6 border border-black/6">
               <h3 className="font-display text-sm font-semibold mb-3 flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-secondary" />
-                Your Notes
+                <Layers className="w-4 h-4 text-primary-light" />
+                Key Topics
               </h3>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                onBlur={saveNotes}
-                placeholder="Take notes as you learn..."
-                className="w-full bg-black/4 border border-black/8 rounded-xl px-4 py-3
-                  text-sm text-foreground placeholder:text-muted/50 resize-none min-h-[120px]
-                  focus:outline-none focus:border-primary/40 transition-colors"
-              />
-              {savingNotes && (
-                <p className="text-xs text-muted mt-1">Saving...</p>
-              )}
+              <div className="flex flex-wrap gap-2">
+                {(node.key_topics as string[]).map((topic) => (
+                  <Badge key={topic} variant="default">
+                    {topic}
+                  </Badge>
+                ))}
+              </div>
             </div>
+          )}
+
+          <div className="glass-panel rounded-2xl p-6 border border-black/6">
+            <h3 className="font-display text-sm font-semibold mb-3 flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-secondary" />
+              Your Notes
+            </h3>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              onBlur={saveNotes}
+              placeholder="Take notes as you learn..."
+              className="w-full bg-black/4 border border-black/8 rounded-xl px-4 py-3
+                text-sm text-foreground placeholder:text-muted/50 resize-none min-h-[120px]
+                focus:outline-none focus:border-primary/40 transition-colors"
+            />
+            {savingNotes && (
+              <p className="text-xs text-muted mt-1">Saving...</p>
+            )}
+          </div>
           </div>
 
-          <div className="w-full lg:w-96 glass-panel rounded-2xl p-6 border border-black/6 self-start">
-            <ModuleResourcePanel
-              nodeId={node.id}
-              nodeLabel={node.label}
-              skillName={skill?.name || ""}
-            />
-          </div>
+          <aside className="w-[340px] flex-shrink-0 sticky top-[72px]">
+            <div className="glass-panel rounded-2xl p-5 border border-black/6">
+              <ModuleResourcePanel
+                nodeId={node.id}
+                nodeLabel={node.label}
+                skillName={skill?.name ?? "Skill"}
+              />
+            </div>
+          </aside>
         </div>
       </div>
     </motion.div>

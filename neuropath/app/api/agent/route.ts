@@ -292,7 +292,7 @@ Respond with JSON only: { "approved": boolean, "title": "string", "type": "video
   }
 
   // General question or guidance - use Claude for short responses
-  const systemPrompt = `You are a concise AI agent for NeuroPath. You help users with their learning roadmap.
+  const systemPrompt = `You are a concise AI agent for Tesseract. You help users with their learning roadmap.
 
 RULES:
 - Reply in 1-3 SHORT sentences max.
