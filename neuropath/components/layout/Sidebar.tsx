@@ -183,7 +183,6 @@ export function Sidebar() {
           ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           m-3 lg:my-3 lg:ml-3
           glass-panel rounded-2xl
-          shadow-[0_8px_32px_rgba(0,0,0,0.06)]
           overflow-hidden
         `}
       >
@@ -204,7 +203,7 @@ export function Sidebar() {
               </div>
             )}
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground truncate">
+              <p className="text-sm font-semibold text-[#1a1a1a] truncate">
                 {displayName}
               </p>
               <p className="text-xs text-muted truncate">{user?.email}</p>
@@ -216,7 +215,7 @@ export function Sidebar() {
             onClick={() => setShowProfilePage(true)}
             onMouseEnter={() => setIsProfileBarHovered(true)}
             onMouseLeave={() => setIsProfileBarHovered(false)}
-            className="w-full h-9 rounded-full bg-black/5 hover:bg-black/10
+            className="w-full h-9 rounded-full bg-white/25 hover:bg-white/40
               transition-colors duration-200 flex items-center justify-center overflow-hidden"
           >
             <div className="flex items-center justify-center gap-2">
@@ -245,7 +244,7 @@ export function Sidebar() {
             onClick={() => setShowSkillIntakeModal(true)}
             onMouseEnter={() => setIsNewSkillHovered(true)}
             onMouseLeave={() => setIsNewSkillHovered(false)}
-            className="w-full h-9 rounded-full bg-primary/10 hover:bg-primary/15
+            className="w-full h-9 rounded-full bg-primary/15 hover:bg-primary/20
               transition-colors duration-200 flex items-center justify-center overflow-hidden"
           >
             <div className="flex items-center justify-center gap-2">
@@ -291,7 +290,7 @@ export function Sidebar() {
                     className={`
                       w-full text-left px-4 py-3 flex items-center gap-3 rounded-full
                       transition-all duration-200 group
-                      ${isActive ? "bg-[#1a1a1a] text-white shadow-sm" : "hover:bg-black/5 text-foreground"}
+                      ${isActive ? "bg-[#1a1a1a] text-white shadow-sm" : "hover:bg-white/30 text-[#1a1a1a]"}
                     `}
                   >
                     <ChevronRight
@@ -303,7 +302,7 @@ export function Sidebar() {
                       <div className="flex items-center gap-1.5">
                         <p
                           className={`text-sm font-medium truncate ${
-                            isActive ? "text-white" : "text-foreground"
+                            isActive ? "text-white" : "text-[#1a1a1a]"
                           }`}
                         >
                           {skill.name}

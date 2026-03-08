@@ -97,7 +97,7 @@ export function ChatPanel() {
   if (!isChatOpen) return null;
 
   return (
-    <aside className="w-80 border-l border-border bg-surface flex flex-col fixed lg:relative right-0 inset-y-0 z-40">
+    <aside className="w-80 border-l border-white/40 flex flex-col fixed lg:relative right-0 inset-y-0 z-40 glass-panel rounded-l-2xl">
       <div className="p-4 border-b border-border flex items-center gap-2">
         <Sparkles className="w-4 h-4 text-secondary" />
         <h2 className="font-display text-sm font-semibold">AI Adviser</h2>

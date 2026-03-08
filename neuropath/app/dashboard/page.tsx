@@ -111,13 +111,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
+    <div className="h-screen flex flex-col bg-background glass-stage overflow-hidden">
       <Header />
 
       <div className="flex-1 flex overflow-hidden">
         <Sidebar />
 
-        <main className="flex-1 relative overflow-hidden flex flex-col m-3 rounded-2xl">
+        <main className="flex-1 relative overflow-hidden flex flex-col m-3 rounded-2xl glass-panel">
           <AnimatePresence mode="wait">
             {showProfilePage ? (
               <ProfilePage key="profile" />

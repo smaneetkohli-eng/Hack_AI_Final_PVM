@@ -34,7 +34,7 @@ const config: Config = {
           DEFAULT: "rgba(0, 0, 0, 0.06)",
           light: "rgba(0, 0, 0, 0.08)",
         },
-        muted: "#6b7280",
+        muted: "#4b5563",
       },
       fontFamily: {
         display: ["var(--font-syne)", "sans-serif"],
