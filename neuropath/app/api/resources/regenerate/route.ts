@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
     source_name: r.source_name,
     thumbnail_url: r.thumbnail_url || null,
     duration: r.duration || null,
+    description: r.description || null,
     is_verified: r.is_verified,
     last_fetched_at: new Date().toISOString(),
   }));

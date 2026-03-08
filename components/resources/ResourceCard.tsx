@@ -47,6 +47,11 @@ export function ResourceCard({ resource, onResourceClick }: ResourceCardProps) {
         <p className="text-sm font-medium text-foreground truncate group-hover:text-primary-light transition-colors">
           {resource.title}
         </p>
+        {resource.description && (
+          <p className="text-xs text-muted mt-0.5 line-clamp-2">
+            {resource.description}
+          </p>
+        )}
         <div className="flex items-center gap-2 mt-1">
           <span className="text-xs text-muted truncate">
             {resource.source_name}
