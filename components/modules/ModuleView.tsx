@@ -11,10 +11,12 @@ import {
   Loader2,
   Eye,
   Sparkles,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { useAppStore } from "@/store/useAppStore";
+import { AIDescriptionContent } from "./AIDescriptionContent";
 import { ModuleResourcePanel } from "./ModuleResourcePanel";
 import { createClient } from "@/lib/supabase";
 import confetti from "canvas-confetti";
@@ -46,27 +48,30 @@ export function ModuleView() {
       .findIndex((n) => n.id === selectedNodeId) + 1
   );
 
-  const fetchExplanation = useCallback(async () => {
-    if (!node || !skill) return;
+  const isStepsFormat = (text: string) =>
+    /^##\s+Step\s+\d/m.test(text);
 
-    if (node.ai_explanation) {
+  const fetchLearningSteps = useCallback(async (force = false) => {
+    if (!node) return;
+
+    if (!force && node.ai_explanation && isStepsFormat(node.ai_explanation)) {
       setExplanation(node.ai_explanation);
       return;
     }
 
+    setExplanation("");
     setLoadingExplanation(true);
     try {
-      const response = await fetch("/api/roadmap/modify", {
+      const response = await fetch("/api/roadmap/learning-steps", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "explain",
-          nodeLabel: node.label,
-          nodeDescription: node.description,
-          keyTopics: node.key_topics,
-          skillName: skill.name,
-        }),
+        body: JSON.stringify({ nodeId: node.id, force }),
       });
+
+      if (!response.ok) {
+        setExplanation(node.description || "Learning steps unavailable.");
+        return;
+      }
 
       if (response.body) {
         const reader = response.body.getReader();
@@ -75,27 +80,32 @@ export function ModuleView() {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          text += decoder.decode(value);
+          const chunk = decoder.decode(value);
+          text += chunk;
           setExplanation(text);
         }
 
-        const supabase = createClient();
-        await supabase
-          .from("nodes")
-          .update({ ai_explanation: text })
-          .eq("id", node.id);
+        if (text.includes("<!DOCTYPE") || text.includes("<html")) {
+          setExplanation(node.description || "Learning steps unavailable.");
+          return;
+        }
       }
     } catch (error) {
-      console.error("Error fetching explanation:", error);
+      console.error("Error fetching learning steps:", error);
+      setExplanation(node.description || "Learning steps unavailable.");
     } finally {
       setLoadingExplanation(false);
     }
-  }, [node, skill]);
+  }, [node]);
 
   useEffect(() => {
     if (selectedNodeId && node) {
-      setExplanation(node.ai_explanation || "");
-      fetchExplanation();
+      if (node.ai_explanation && isStepsFormat(node.ai_explanation)) {
+        setExplanation(node.ai_explanation);
+      } else {
+        setExplanation("");
+      }
+      fetchLearningSteps();
       loadNotes();
       logEvent("node_viewed");
     }
@@ -219,39 +229,50 @@ export function ModuleView() {
       exit={{ opacity: 0 }}
       className="absolute inset-0 z-20 bg-background overflow-y-auto"
     >
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border">
-        <div className="flex items-center justify-between px-6 py-3 max-w-5xl mx-auto">
-          <button
-            onClick={() => setSelectedNodeId(null)}
-            className="flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Modules
-          </button>
-          <div className="flex items-center gap-2">
-            {!isCompleted && (
-              <>
-                <Button variant="secondary" size="sm" onClick={handleMarkKnown}>
-                  <Eye className="w-3.5 h-3.5" />
-                  Already Know This
-                </Button>
-                <Button size="sm" onClick={handleMarkComplete}>
-                  <Check className="w-3.5 h-3.5" />
-                  Mark Complete
-                </Button>
-              </>
-            )}
-            {isCompleted && (
-              <Badge variant={node.status === "complete" ? "primary" : "success"}>
-                <Check className="w-3 h-3" />
-                {node.status === "complete" ? "Completed" : "Known"}
-              </Badge>
-            )}
-          </div>
+      <div className="sticky top-0 z-10 px-6 py-3 max-w-6xl mx-auto flex items-center justify-between gap-3">
+        <button
+          onClick={() => setSelectedNodeId(null)}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 border border-black/6
+            text-sm text-muted hover:text-foreground hover:bg-white
+            shadow-sm transition-all"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Modules
+        </button>
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border shadow-sm
+          ${isCompleted && node?.status === "complete"
+            ? "bg-primary/10 border-primary/20"
+            : isCompleted && node?.status === "known"
+              ? "bg-emerald-500/10 border-emerald-500/20"
+              : "bg-white/80 border-black/6"
+          }`}>
+          {!isCompleted && (
+            <>
+              <Button variant="secondary" size="sm" onClick={handleMarkKnown}
+                className="rounded-lg"
+              >
+                <Eye className="w-3.5 h-3.5" />
+                Already Know This
+              </Button>
+              <Button size="sm" onClick={handleMarkComplete}
+                className="rounded-lg"
+              >
+                <Check className="w-3.5 h-3.5" />
+                Mark Complete
+              </Button>
+            </>
+          )}
+          {isCompleted && (
+            <span className={`inline-flex items-center gap-1.5 text-sm font-medium
+              ${node.status === "complete" ? "text-primary" : "text-emerald-600"}`}>
+              <Check className="w-3 h-3" />
+              {node.status === "complete" ? "Completed" : "Known"}
+            </span>
+          )}
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="w-full max-w-6xl mx-auto px-6 py-8">
         <div className="mb-8">
           <p className="text-sm font-medium text-primary-light mb-1">
             Module {moduleNumber}
@@ -267,73 +288,91 @@ export function ModuleView() {
           )}
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="flex-1 space-y-6">
-            <div className="bg-surface border border-border rounded-xl p-6">
-              <h3 className="font-display text-sm font-semibold mb-3 flex items-center gap-2">
+        <div className="flex gap-8 items-start">
+          <div className="flex-1 min-w-0 max-w-3xl space-y-6">
+          <div className="glass-panel rounded-2xl p-6 border border-black/6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display text-sm font-semibold flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-secondary" />
-                AI Generated Description
+                Learning Path
               </h3>
-              {loadingExplanation && !explanation ? (
-                <div className="flex items-center gap-2 text-sm text-muted">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Generating description...
-                </div>
-              ) : (
-                <div className="prose prose-invert prose-sm max-w-none">
-                  <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">
-                    {explanation || node.description}
-                  </p>
-                </div>
-              )}
-              <p className="text-[10px] text-muted mt-4">
-                Generated using Claude API
-              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => fetchLearningSteps(true)}
+                loading={loadingExplanation}
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                Regenerate
+              </Button>
             </div>
-
-            {node.key_topics && (node.key_topics as string[]).length > 0 && (
-              <div className="bg-surface border border-border rounded-xl p-6">
-                <h3 className="font-display text-sm font-semibold mb-3 flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-primary-light" />
-                  Key Topics
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {(node.key_topics as string[]).map((topic) => (
-                    <Badge key={topic} variant="default">
-                      {topic}
-                    </Badge>
-                  ))}
-                </div>
+            {loadingExplanation && !explanation ? (
+              <div className="flex items-center gap-2 text-sm text-muted py-6">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Generating learning steps...
               </div>
+            ) : (
+              <motion.div
+                className="max-w-none"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              >
+                <AIDescriptionContent
+                  content={explanation || node.description || ""}
+                />
+              </motion.div>
             )}
+            <p className="text-[10px] text-muted mt-4">
+              Generated using Claude API &middot; Resources embedded in steps
+            </p>
+          </div>
 
-            <div className="bg-surface border border-border rounded-xl p-6">
+          {node.key_topics && (node.key_topics as string[]).length > 0 && (
+            <div className="glass-panel rounded-2xl p-6 border border-black/6">
               <h3 className="font-display text-sm font-semibold mb-3 flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-secondary" />
-                Your Notes
+                <Layers className="w-4 h-4 text-primary-light" />
+                Key Topics
               </h3>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                onBlur={saveNotes}
-                placeholder="Take notes as you learn..."
-                className="w-full bg-surface-light border border-border rounded-lg px-4 py-3
-                  text-sm text-foreground placeholder:text-muted/50 resize-none min-h-[120px]
-                  focus:outline-none focus:border-primary transition-colors"
-              />
-              {savingNotes && (
-                <p className="text-xs text-muted mt-1">Saving...</p>
-              )}
+              <div className="flex flex-wrap gap-2">
+                {(node.key_topics as string[]).map((topic) => (
+                  <Badge key={topic} variant="default">
+                    {topic}
+                  </Badge>
+                ))}
+              </div>
             </div>
+          )}
+
+          <div className="glass-panel rounded-2xl p-6 border border-black/6">
+            <h3 className="font-display text-sm font-semibold mb-3 flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-secondary" />
+              Your Notes
+            </h3>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              onBlur={saveNotes}
+              placeholder="Take notes as you learn..."
+              className="w-full bg-black/4 border border-black/8 rounded-xl px-4 py-3
+                text-sm text-foreground placeholder:text-muted/50 resize-none min-h-[120px]
+                focus:outline-none focus:border-primary/40 transition-colors"
+            />
+            {savingNotes && (
+              <p className="text-xs text-muted mt-1">Saving...</p>
+            )}
+          </div>
           </div>
 
-          <div className="w-full lg:w-96">
-            <ModuleResourcePanel
-              nodeId={node.id}
-              nodeLabel={node.label}
-              skillName={skill?.name || ""}
-            />
-          </div>
+          <aside className="w-[340px] flex-shrink-0 sticky top-[72px]">
+            <div className="glass-panel rounded-2xl p-5 border border-black/6">
+              <ModuleResourcePanel
+                nodeId={node.id}
+                nodeLabel={node.label}
+                skillName={skill?.name ?? "Skill"}
+              />
+            </div>
+          </aside>
         </div>
       </div>
     </motion.div>

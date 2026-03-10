@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { ChatPanel } from "@/components/layout/ChatPanel";
-import { ModuleCardGrid } from "@/components/modules/ModuleCardGrid";
+import { AgentBubble } from "@/components/layout/AgentBubble";
+import { RoadmapGraph } from "@/components/modules/RoadmapGraph";
+import { PeekPanel } from "@/components/modules/PeekPanel";
 import { ModuleView } from "@/components/modules/ModuleView";
 import { ProfileSetupModal } from "@/components/modals/ProfileSetupModal";
 import { SkillIntakeModal } from "@/components/modals/SkillIntakeModal";
+import { ProfilePage } from "@/components/profile/ProfilePage";
 import { useAppStore } from "@/store/useAppStore";
 import { createClient } from "@/lib/supabase";
 import type { DBNode } from "@/types";
@@ -20,8 +22,13 @@ export default function DashboardPage() {
     setSkills,
     setNodes,
     setShowProfileModal,
+    setPinnedSkillIds,
     selectedNodeId,
+    setSelectedNodeId,
     activeSkillId,
+    peekPanelNodeId,
+    setPeekPanelNodeId,
+    showProfilePage,
   } = useAppStore();
 
   const [loading, setLoading] = useState(true);
@@ -56,6 +63,10 @@ export default function DashboardPage() {
 
       if (profileRes.data) {
         setProfile(profileRes.data);
+        const pinned = profileRes.data.metadata?.pinned_skill_ids;
+        if (Array.isArray(pinned)) {
+          setPinnedSkillIds(pinned);
+        }
         if (!profileRes.data.profile_complete) {
           setShowProfileModal(true);
         }
@@ -100,20 +111,49 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
+    <div className="h-screen flex flex-col bg-background glass-stage overflow-hidden">
       <Header />
 
       <div className="flex-1 flex overflow-hidden">
         <Sidebar />
 
-        <main className="flex-1 relative overflow-hidden">
-          <AnimatePresence>
-            {selectedNodeId ? <ModuleView /> : <ModuleCardGrid />}
+        <main className="flex-1 relative overflow-hidden flex flex-col m-3 rounded-2xl glass-panel">
+          <AnimatePresence mode="wait">
+            {showProfilePage ? (
+              <ProfilePage key="profile" />
+            ) : selectedNodeId ? (
+              <ModuleView key="module" />
+            ) : activeSkillId ? (
+              <div key="roadmap" className="flex-1 flex flex-col relative">
+                <RoadmapGraph />
+                <AnimatePresence>
+                  {peekPanelNodeId && (
+                    <PeekPanel
+                      nodeId={peekPanelNodeId}
+                      onClose={() => setPeekPanelNodeId(null)}
+                      onDiveDeeper={() => {
+                        setSelectedNodeId(peekPanelNodeId);
+                        setPeekPanelNodeId(null);
+                      }}
+                    />
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <div
+                key="empty"
+                className="flex-1 flex items-center justify-center"
+              >
+                <p className="text-sm text-muted/60 text-center max-w-[240px]">
+                  Open a skill roadmap or create one
+                </p>
+              </div>
+            )}
           </AnimatePresence>
         </main>
-
-        <ChatPanel />
       </div>
+
+      <AgentBubble />
 
       <ProfileSetupModal />
       <SkillIntakeModal />

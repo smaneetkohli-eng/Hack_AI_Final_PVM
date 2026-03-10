@@ -28,6 +28,7 @@ export interface ModuleData {
   description: string;
   estimatedTime: string;
   keyTopics: string[];
+  prerequisites?: string[];
   resourceCounts: {
     lessons: number;
     exercises: number;
@@ -125,6 +126,13 @@ export interface DBLearningEvent {
   created_at: string;
 }
 
+export interface UserProfileMetadata {
+  display_name?: string;
+  avatar_url?: string;
+  pinned_skill_ids?: string[];
+  [key: string]: unknown;
+}
+
 export interface DBUserProfile {
   id: string;
   user_id: string;
@@ -133,7 +141,7 @@ export interface DBUserProfile {
   experience_level: string | null;
   career_goal: string | null;
   preferred_languages: string[];
-  metadata: Record<string, unknown>;
+  metadata: UserProfileMetadata;
   profile_complete: boolean;
   created_at: string;
   updated_at: string;

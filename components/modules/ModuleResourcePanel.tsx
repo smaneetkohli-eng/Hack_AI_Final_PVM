@@ -55,7 +55,7 @@ function classifyResource(r: DBNodeResource): ResourceType {
 }
 
 export function ModuleResourcePanel({ nodeId, nodeLabel, skillName }: ModuleResourcePanelProps) {
-  const { user } = useAppStore();
+  const { user, invalidateResourcesNodeId, setInvalidateResourcesNodeId } = useAppStore();
   const [resources, setResources] = useState<DBNodeResource[]>([]);
   const [loading, setLoading] = useState(true);
   const [regenerating, setRegenerating] = useState(false);
@@ -80,6 +80,13 @@ export function ModuleResourcePanel({ nodeId, nodeLabel, skillName }: ModuleReso
   useEffect(() => {
     fetchResources();
   }, [fetchResources]);
+
+  useEffect(() => {
+    if (invalidateResourcesNodeId === nodeId) {
+      fetchResources();
+      setInvalidateResourcesNodeId(null);
+    }
+  }, [invalidateResourcesNodeId, nodeId, fetchResources, setInvalidateResourcesNodeId]);
 
   const handleRegenerate = async () => {
     setRegenerating(true);
@@ -199,16 +206,16 @@ export function ModuleResourcePanel({ nodeId, nodeLabel, skillName }: ModuleReso
         ))
       )}
 
-      <div className="pt-3 border-t border-border">
+      <div className="pt-3 border-t border-black/6">
         {showSuggest ? (
           <div className="flex gap-2">
             <input
               value={suggestUrl}
               onChange={(e) => setSuggestUrl(e.target.value)}
               placeholder="Paste a URL..."
-              className="flex-1 bg-surface-light border border-border rounded-lg px-3 py-2 text-sm
+              className="flex-1 bg-black/4 border border-black/8 rounded-xl px-3 py-2 text-sm
                 text-foreground placeholder:text-muted/50
-                focus:outline-none focus:border-primary transition-colors"
+                focus:outline-none focus:border-primary/40 transition-colors"
             />
             <Button size="sm" onClick={handleSuggest}>
               Add
@@ -245,11 +252,11 @@ function ResourceRow({
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => onResourceClick(resource)}
-      className="flex gap-3 p-3 rounded-xl bg-surface border border-border
-        hover:border-border-light hover:bg-surface-light
+      className="flex gap-3 p-3 rounded-xl bg-white/80 border border-black/6
+        hover:border-black/10 hover:bg-white
         transition-all duration-200 group"
     >
-      <div className="w-9 h-9 rounded-lg bg-surface-lighter flex items-center justify-center flex-shrink-0">
+      <div className="w-9 h-9 rounded-xl bg-black/5 flex items-center justify-center flex-shrink-0">
         {isVideo ? (
           <Play className="w-4 h-4 text-secondary" />
         ) : (
@@ -257,19 +264,19 @@ function ResourceRow({
         )}
       </div>
 
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-foreground truncate group-hover:text-primary-light transition-colors">
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <p className="text-sm font-medium text-foreground break-words group-hover:text-primary-light transition-colors">
           {resource.title}
         </p>
         {resource.description && (
-          <p className="text-xs text-muted mt-0.5 line-clamp-2">
+          <p className="text-[11px] text-muted mt-0.5 line-clamp-1">
             {resource.description}
           </p>
         )}
-        <div className="flex items-center gap-2 mt-1.5">
-          <span className="text-[11px] text-muted truncate">
-            {resource.source_name}
-          </span>
+        <div className="flex items-center gap-2 mt-1 flex-wrap">
+          {resource.source_name && (
+            <span className="text-[11px] text-muted">{resource.source_name}</span>
+          )}
           {resource.duration && (
             <span className="inline-flex items-center gap-0.5 text-[11px] text-muted">
               <Clock className="w-2.5 h-2.5" />

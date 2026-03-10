@@ -3,11 +3,11 @@
 type BadgeVariant = "default" | "primary" | "success" | "warning" | "cyan";
 
 const variantClasses: Record<BadgeVariant, string> = {
-  default: "bg-surface-lighter text-muted",
-  primary: "bg-primary/20 text-primary-light",
-  success: "bg-success/20 text-success-light",
-  warning: "bg-yellow-500/20 text-yellow-400",
-  cyan: "bg-secondary/20 text-secondary-light",
+  default: "bg-black/5 text-foreground/80",
+  primary: "bg-primary/15 text-primary-dark",
+  success: "bg-success/15 text-success",
+  warning: "bg-amber-100 text-amber-700",
+  cyan: "bg-secondary/15 text-secondary-dark",
 };
 
 interface BadgeProps {

@@ -19,13 +19,27 @@ interface AppState {
   nodes: DBNode[];
   setNodes: (nodes: DBNode[]) => void;
   updateNodeStatus: (nodeId: string, status: DBNode["status"]) => void;
+  updateNodePosition: (nodeId: string, x: number, y: number) => void;
 
   selectedNodeId: string | null;
   setSelectedNodeId: (id: string | null) => void;
 
+  peekPanelNodeId: string | null;
+  setPeekPanelNodeId: (id: string | null) => void;
+
   chatMessages: DBChatMessage[];
   setChatMessages: (messages: DBChatMessage[]) => void;
   addChatMessage: (message: DBChatMessage) => void;
+
+  agentMessages: DBChatMessage[];
+  setAgentMessages: (messages: DBChatMessage[]) => void;
+  addAgentMessage: (message: DBChatMessage) => void;
+
+  isAgentExpanded: boolean;
+  setIsAgentExpanded: (open: boolean) => void;
+
+  invalidateResourcesNodeId: string | null;
+  setInvalidateResourcesNodeId: (id: string | null) => void;
 
   showProfileModal: boolean;
   setShowProfileModal: (show: boolean) => void;
@@ -38,6 +52,17 @@ interface AppState {
 
   isChatOpen: boolean;
   setIsChatOpen: (open: boolean) => void;
+
+  showProfilePage: boolean;
+  setShowProfilePage: (show: boolean) => void;
+
+  pinnedSkillIds: string[];
+  setPinnedSkillIds: (ids: string[]) => void;
+  pinSkill: (id: string) => void;
+  unpinSkill: (id: string) => void;
+
+  expandedSkillId: string | null;
+  setExpandedSkillId: (id: string | null) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -51,7 +76,10 @@ export const useAppStore = create<AppState>((set) => ({
   setSkills: (skills) => set({ skills }),
   addSkill: (skill) => set((s) => ({ skills: [...s.skills, skill] })),
   removeSkill: (id) =>
-    set((s) => ({ skills: s.skills.filter((sk) => sk.id !== id) })),
+    set((s) => ({
+      skills: s.skills.filter((sk) => sk.id !== id),
+      pinnedSkillIds: s.pinnedSkillIds.filter((pid) => pid !== id),
+    })),
 
   activeSkillId: null,
   setActiveSkillId: (id) => set({ activeSkillId: id }),
@@ -62,14 +90,34 @@ export const useAppStore = create<AppState>((set) => ({
     set((s) => ({
       nodes: s.nodes.map((n) => (n.id === nodeId ? { ...n, status } : n)),
     })),
+  updateNodePosition: (nodeId, x, y) =>
+    set((s) => ({
+      nodes: s.nodes.map((n) =>
+        n.id === nodeId ? { ...n, position_x: x, position_y: y } : n
+      ),
+    })),
 
   selectedNodeId: null,
   setSelectedNodeId: (id) => set({ selectedNodeId: id }),
+
+  peekPanelNodeId: null,
+  setPeekPanelNodeId: (id) => set({ peekPanelNodeId: id }),
 
   chatMessages: [],
   setChatMessages: (messages) => set({ chatMessages: messages }),
   addChatMessage: (message) =>
     set((s) => ({ chatMessages: [...s.chatMessages, message] })),
+
+  agentMessages: [],
+  setAgentMessages: (messages) => set({ agentMessages: messages }),
+  addAgentMessage: (message) =>
+    set((s) => ({ agentMessages: [...s.agentMessages, message] })),
+
+  isAgentExpanded: false,
+  setIsAgentExpanded: (open) => set({ isAgentExpanded: open }),
+
+  invalidateResourcesNodeId: null,
+  setInvalidateResourcesNodeId: (id) => set({ invalidateResourcesNodeId: id }),
 
   showProfileModal: false,
   setShowProfileModal: (show) => set({ showProfileModal: show }),
@@ -82,4 +130,23 @@ export const useAppStore = create<AppState>((set) => ({
 
   isChatOpen: true,
   setIsChatOpen: (open) => set({ isChatOpen: open }),
+
+  showProfilePage: false,
+  setShowProfilePage: (show) => set({ showProfilePage: show }),
+
+  pinnedSkillIds: [],
+  setPinnedSkillIds: (ids) => set({ pinnedSkillIds: ids }),
+  pinSkill: (id) =>
+    set((s) => ({
+      pinnedSkillIds: s.pinnedSkillIds.includes(id)
+        ? s.pinnedSkillIds
+        : [...s.pinnedSkillIds, id],
+    })),
+  unpinSkill: (id) =>
+    set((s) => ({
+      pinnedSkillIds: s.pinnedSkillIds.filter((pid) => pid !== id),
+    })),
+
+  expandedSkillId: null,
+  setExpandedSkillId: (id) => set({ expandedSkillId: id }),
 }));

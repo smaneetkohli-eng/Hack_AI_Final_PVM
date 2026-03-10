@@ -1,6 +1,7 @@
-  -- NeuroPath Database Schema
+  -- Tesseract Database Schema
 
 -- User Profiles
+-- metadata JSONB stores: { display_name, avatar_url, pinned_skill_ids[] }
 CREATE TABLE user_profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,

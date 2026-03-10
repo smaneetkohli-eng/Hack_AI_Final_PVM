@@ -35,6 +35,53 @@ export const TRUSTED_DOMAINS = [
   "the-algorithm.net",
 ];
 
+export const AUTO_APPROVE_DOMAINS = [
+  "youtube.com",
+  "youtu.be",
+  "github.com",
+  "medium.com",
+  "dev.to",
+  "stackoverflow.com",
+  "freecodecamp.org",
+  "udemy.com",
+  "coursera.org",
+  "edx.org",
+  "khanacademy.org",
+  "w3schools.com",
+  "geeksforgeeks.org",
+  "developer.mozilla.org",
+  "docs.python.org",
+  "pytorch.org",
+  "tensorflow.org",
+  "react.dev",
+  "nextjs.org",
+  "web.dev",
+  "css-tricks.com",
+  "arxiv.org",
+  "hashnode.dev",
+  "linkedin.com",
+  "skillshare.com",
+  "pluralsight.com",
+  "codecademy.com",
+  "leetcode.com",
+  "hackerrank.com",
+  "kaggle.com",
+  "replit.com",
+  "codepen.io",
+  "vimeo.com",
+];
+
+export function isAutoApproveDomain(url: string): boolean {
+  try {
+    const hostname = new URL(url).hostname.replace("www.", "");
+    return AUTO_APPROVE_DOMAINS.some(
+      (domain) => hostname === domain || hostname.endsWith(`.${domain}`)
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function isVerifiedSource(url: string): boolean {
   try {
     const hostname = new URL(url).hostname.replace("www.", "");

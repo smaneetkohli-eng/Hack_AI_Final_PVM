@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const { nodeId, force } = await request.json();
+  const { nodeId } = await request.json();
 
   if (!nodeId) {
     return new Response("Missing nodeId", { status: 400 });

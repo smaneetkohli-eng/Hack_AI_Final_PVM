@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tesseract — AI-Adaptive Learning Adviser
+
+Personalized skill-learning roadmaps powered by AI with a glass UI. Master any skill with adaptive, visual learning paths.
 
 ## Getting Started
 

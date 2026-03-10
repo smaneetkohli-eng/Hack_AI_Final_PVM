@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { skillId, message, skillName, activeNodeId, activeNodeLabel, nodes } = body;
+  const { skillId, message, skillName, activeNodeLabel, nodes } = body;
 
   const nodeList = (nodes || []) as { id: string; label: string; node_key: string; module_order?: number }[];
 
